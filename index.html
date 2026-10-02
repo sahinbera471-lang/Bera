@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HaarScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Messinstrument. Links die Aufnahme mit Messlinien, rechts die Werte; darunter Befund und Plan als Karten nach Priorität. */
+:root {
+  --bg: #edf1f0;
+  --surface: #ffffff;
+  --surface-2: #f5f8f7;
+  --ink: #14201f;
+  --muted: #5a6a68;
+  --line: #d2dbd9;
+  --accent: #0b6b6b;
+  --accent-soft: #dcecea;
+  --accent-ink: #ffffff;
+  --copper: #a8502a;
+  --ok: #2c7a47;
+  --ok-soft: #e1f0e6;
+  --warn: #9a6514;
+  --warn-soft: #f6ecd8;
+  --bad: #ad3434;
+  --bad-soft: #f6e0e0;
+  --font-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", Roboto, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1413; --surface: #151f1e; --surface-2: #1b2726; --ink: #e2ebe9; --muted: #93a4a1;
+    --line: #2a3836; --accent: #52b9b2; --accent-soft: #173533; --accent-ink: #062120; --copper: #e08b5c;
+    --ok: #63c283; --ok-soft: #173023; --warn: #e2ad4e; --warn-soft: #33281a; --bad: #e57373; --bad-soft: #3a1f1f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1413; --surface: #151f1e; --surface-2: #1b2726; --ink: #e2ebe9; --muted: #93a4a1;
+  --line: #2a3836; --accent: #52b9b2; --accent-soft: #173533; --accent-ink: #062120; --copper: #e08b5c;
+  --ok: #63c283; --ok-soft: #173023; --warn: #e2ad4e; --warn-soft: #33281a; --bad: #e57373; --bad-soft: #3a1f1f;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--font-body); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.45rem; font-weight: 700; }
+h3 { font-size: 1.08rem; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.eyebrow { font: 600 0.72rem/1 var(--font-data); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+
+header.top { display: grid; gap: 10px; padding-top: 8px; }
+header.top .lede { max-width: 62ch; color: var(--muted); font-size: 1.05rem; }
+.ruler { height: 14px; background:
+  repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 10px),
+  repeating-linear-gradient(90deg, var(--muted) 0 1px, transparent 1px 50px);
+  background-size: 100% 7px, 100% 14px; background-repeat: no-repeat; background-position: bottom, bottom; opacity: .7; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: 600 0.95rem/1 var(--font-body); padding: 11px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:focus-visible, .chip:focus-within, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: default; }
+.btn input[type=file] { display: none; }
+
+.stage { position: relative; background: var(--surface-2); border: 1px dashed var(--line); border-radius: 8px; overflow: hidden; min-height: 220px; display: grid; place-items: center; }
+.stage canvas, .stage video { display: block; width: 100%; height: auto; touch-action: none; }
+.stage video { transform: scaleX(-1); }
+.stage .empty { padding: 28px 20px; text-align: center; color: var(--muted); display: grid; gap: 10px; justify-items: center; max-width: 42ch; }
+.stage .empty svg { width: 96px; height: 96px; }
+.stage .busy { position: absolute; inset: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 78%, transparent); font: 600 0.95rem var(--font-data); color: var(--accent); }
+.shutter { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
+.guide { position: absolute; inset: 8% 26% 12% 26%; border: 2px dashed rgba(255,255,255,.75); border-radius: 50% 50% 46% 46%; pointer-events: none; }
+
+.status { font-size: .92rem; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); }
+.status.warn { background: var(--warn-soft); border-color: transparent; color: var(--ink); }
+.status.bad { background: var(--bad-soft); border-color: transparent; }
+.status.ok { background: var(--ok-soft); border-color: transparent; }
+
+ol.howto { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; color: var(--muted); }
+ol.howto b { color: var(--ink); }
+
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.metric { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 4px; background: var(--surface-2); min-width: 0; }
+.metric .k { font-size: .8rem; color: var(--muted); }
+.metric .v { font: 600 1.45rem/1.1 var(--font-data); font-variant-numeric: tabular-nums; }
+.metric .v small { font-size: .8rem; font-weight: 400; color: var(--muted); }
+.pill { display: inline-block; justify-self: start; font: 600 .72rem/1 var(--font-data); letter-spacing: .04em; padding: 5px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.neutral { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
+.scale { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.scale .seg { border: 1px solid var(--line); border-radius: 6px; padding: 8px 4px 6px; text-align: center; display: grid; gap: 4px; justify-items: center; background: var(--surface-2); min-width: 0; }
+.scale .seg svg { width: 100%; max-width: 46px; height: auto; }
+.scale .seg span { font: 600 .78rem var(--font-data); color: var(--muted); }
+.scale .seg.on { border-color: var(--copper); background: color-mix(in srgb, var(--copper) 14%, var(--surface)); }
+.scale .seg.on span { color: var(--copper); }
+.scale-note { font-size: .88rem; color: var(--muted); }
+
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; min-width: 0; }
+legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip span { display: inline-block; padding: 8px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface-2); font-size: .92rem; cursor: pointer; }
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.quiz { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; align-items: start; }
+@media (max-width: 720px) { .quiz { grid-template-columns: minmax(0, 1fr); } }
+
+.findings { display: grid; gap: 10px; }
+.finding { display: grid; grid-template-columns: 6px minmax(0, 1fr); gap: 12px; align-items: stretch; }
+.finding .bar { border-radius: 3px; background: var(--accent); }
+.finding.ok .bar { background: var(--ok); }
+.finding.warn .bar { background: var(--warn); }
+.finding.bad .bar { background: var(--bad); }
+.finding .txt { display: grid; gap: 2px; padding-block: 2px; }
+
+.plan { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.rec { border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 8px; align-content: start; background: var(--surface); }
+.rec.top { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.rec .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.rec dl { margin: 0; display: grid; gap: 6px; font-size: .93rem; }
+.rec dt { font: 600 .72rem/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.rec dd { margin: 0; }
+
+.example-flag { font: 600 .72rem var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); background: var(--warn-soft); padding: 5px 8px; border-radius: 6px; }
+
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 600 .72rem var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+td.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+.sources { display: grid; gap: 6px; font-size: .9rem; padding-left: 1.2em; margin: 0; }
+.disclaimer { font-size: .88rem; color: var(--muted); max-width: 75ch; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rec, .finding { animation: rise .35s ease both; }
+  @keyframes rise { from { transform: translateY(4px); } to { transform: none; } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Haaransatz · Geheimratsecken · Kopfhaut</span>
+  <h1>HaarScan</h1>
+  <p class="lede">Mach ein Foto von deiner Stirn und deinem Oberkopf. Die App erkennt dein Gesicht, sucht den Haaransatz, misst die Geheimratsecken in Millimetern und gibt dir einen Plan mit Tipps, die durch Studien und Leitlinien gedeckt sind.</p>
+  <div class="ruler" aria-hidden="true"></div>
+</header>
+
+<!-- 1. Stirn-Scan -->
+<section class="panel" id="front">
+  <div class="panel-head">
+    <h2>1 · Stirn &amp; Haaransatz scannen</h2>
+    <span class="muted">Fotos bleiben auf deinem Gerät</span>
+  </div>
+  <div class="grid-2">
+    <div style="display:grid;gap:12px;min-width:0">
+      <div class="btns">
+        <label class="btn primary" for="frontCapture">Selfie aufnehmen<input id="frontCapture" type="file" accept="image/*" capture="user"></label>
+        <label class="btn" for="frontPick">Foto wählen<input id="frontPick" type="file" accept="image/*"></label>
+        <button class="btn" id="liveBtn" type="button">Live-Kamera</button>
+      </div>
+      <div class="stage" id="frontStage">
+        <div class="empty" id="frontEmpty">
+          <svg viewBox="0 0 96 96" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="48" cy="52" rx="26" ry="32"/><path d="M24 40c4-16 14-22 24-22s20 6 24 22c-6-6-10-7-14-7-3-6-8-8-10-8s-7 2-10 8c-4 0-8 1-14 7z" fill="currentColor" opacity=".25"/><path d="M36 46h8M52 46h8" /><path d="M14 30h6M76 30h6M14 30v-6M82 30v-6" stroke-dasharray="2 2"/></svg>
+          <p>Noch kein Foto. Nimm ein Selfie von vorne auf, Haare aus der Stirn.</p>
+        </div>
+        <canvas id="frontCanvas" hidden></canvas>
+        <video id="video" playsinline muted hidden></video>
+        <div class="guide" id="guide" hidden></div>
+        <button class="btn primary shutter" id="shutter" type="button" hidden>Auslösen</button>
+        <div class="busy" id="frontBusy" hidden>Analysiere…</div>
+      </div>
+      <p class="status" id="frontStatus">Tipp: Wenn der Haaransatz nicht genau getroffen ist, zieh die drei Punkte (L, M, R) auf dem Bild an die richtige Stelle. Die Werte rechnen sich sofort neu.</p>
+    </div>
+    <div style="display:grid;gap:14px;min-width:0">
+      <h3>So wird das Foto gut</h3>
+      <ol class="howto">
+        <li><b>Haare zurück</b> aus der Stirn kämmen oder mit Haarband halten.</li>
+        <li><b>Gerade in die Kamera</b> schauen, Kamera auf Augenhöhe, ca. 40 cm Abstand.</li>
+        <li><b>Gleichmäßiges Licht</b> von vorne, kein Gegenlicht, kein Blitz.</li>
+        <li><b>Ganzer Kopf im Bild</b>, mit etwas Platz über den Haaren.</li>
+        <li>Neutraler Gesichtsausdruck, Augenbrauen entspannt.</li>
+      </ol>
+      <p class="muted" style="font-size:.9rem">Gemessen wird in echten Millimetern: Die Iris im Auge ist bei Erwachsenen fast immer ca. 11,7 mm breit und dient als Maßstab.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Oberkopf-Scan -->
+<section class="panel" id="crown">
+  <div class="panel-head">
+    <h2>2 · Oberkopf / Scheitel scannen <span class="muted" style="font-weight:400;font-size:1rem">(optional)</span></h2>
+  </div>
+  <div class="grid-2">
+    <div style="display:grid;gap:12px;min-width:0">
+      <div class="btns">
+        <label class="btn primary" for="crownCapture">Oberkopf fotografieren<input id="crownCapture" type="file" accept="image/*" capture="environment"></label>
+        <label class="btn" for="crownPick">Foto wählen<input id="crownPick" type="file" accept="image/*"></label>
+      </div>
+      <div class="stage" id="crownStage">
+        <div class="empty" id="crownEmpty">
+          <svg viewBox="0 0 96 96" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="48" cy="48" rx="30" ry="36"/><circle cx="48" cy="54" r="12" stroke-dasharray="3 3"/><path d="M48 14v18" opacity=".6"/></svg>
+          <p>Lass jemanden deinen Oberkopf (Wirbel/Tonsur) von oben fotografieren. Bei Frauen: den Mittelscheitel.</p>
+        </div>
+        <canvas id="crownCanvas" hidden></canvas>
+      </div>
+      <p class="status" id="crownStatus">Tippe auf das Bild, um den Messkreis auf die dünnste Stelle zu setzen.</p>
+    </div>
+    <div style="display:grid;gap:14px;min-width:0">
+      <h3>Was hier gemessen wird</h3>
+      <p class="muted">Im Messkreis wird gezählt, wie viel Kopfhaut zwischen den Haaren durchscheint. Rot markierte Pixel sind sichtbare Kopfhaut.</p>
+      <ol class="howto">
+        <li>Haare <b>trocken</b> und ungestylt, kein Gel.</li>
+        <li>Helles Licht von oben, Foto direkt von oben.</li>
+        <li>Bei sehr hellen, blonden oder grauen Haaren ist die Messung ungenauer.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Fragen -->
+<section class="panel" id="quizPanel">
+  <div class="panel-head"><h2>3 · Kurzer Check</h2><span class="muted">Hilft, die Ursache einzugrenzen</span></div>
+  <form class="quiz" id="quiz">
+    <fieldset>
+      <legend>Geschlecht</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="sex" value="m" id="sex-m" checked><span>Männlich</span></label>
+        <label class="chip"><input type="radio" name="sex" value="w" id="sex-w"><span>Weiblich</span></label>
+        <label class="chip"><input type="radio" name="sex" value="d" id="sex-d"><span>Divers</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Alter</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="age" value="u20" id="age-u20"><span>unter 20</span></label>
+        <label class="chip"><input type="radio" name="age" value="20" id="age-20" checked><span>20–29</span></label>
+        <label class="chip"><input type="radio" name="age" value="30" id="age-30"><span>30–44</span></label>
+        <label class="chip"><input type="radio" name="age" value="45" id="age-45"><span>45+</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Wie kam der Haarausfall?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="onset" value="slow" id="onset-slow" checked><span>Langsam über Jahre</span></label>
+        <label class="chip"><input type="radio" name="onset" value="sudden" id="onset-sudden"><span>Plötzlich viel (Wochen/Monate)</span></label>
+        <label class="chip"><input type="radio" name="onset" value="none" id="onset-none"><span>Noch kein Ausfall, nur Vorsorge</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Glatze oder Geheimratsecken in der Familie?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="family" value="yes" id="fam-yes"><span>Ja</span></label>
+        <label class="chip"><input type="radio" name="family" value="no" id="fam-no"><span>Nein</span></label>
+        <label class="chip"><input type="radio" name="family" value="unknown" id="fam-unknown" checked><span>Weiß nicht</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Wo wird es weniger? <span class="muted" style="font-weight:400">(mehrere möglich)</span></legend>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" name="pattern" value="temples" id="pat-temples"><span>Geheimratsecken</span></label>
+        <label class="chip"><input type="checkbox" name="pattern" value="crown" id="pat-crown"><span>Hinterkopf / Wirbel</span></label>
+        <label class="chip"><input type="checkbox" name="pattern" value="part" id="pat-part"><span>Scheitel wird breiter</span></label>
+        <label class="chip"><input type="checkbox" name="pattern" value="diffuse" id="pat-diffuse"><span>Überall dünner</span></label>
+        <label class="chip"><input type="checkbox" name="pattern" value="patches" id="pat-patches"><span>Runde kahle Stellen</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Trifft etwas davon zu?</legend>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" name="sym" value="itch" id="sym-itch"><span>Jucken / Schuppen</span></label>
+        <label class="chip"><input type="checkbox" name="sym" value="red" id="sym-red"><span>Rötung, Schmerz, Pusteln</span></label>
+        <label class="chip"><input type="checkbox" name="sym" value="tired" id="sym-tired"><span>Oft müde, friere schnell</span></label>
+        <label class="chip"><input type="checkbox" name="sym" value="stress" id="sym-stress"><span>Stress, Krankheit, Fieber oder Diät (letzte 3 Monate)</span></label>
+        <label class="chip"><input type="checkbox" name="sym" value="birth" id="sym-birth"><span>Geburt (letzte 6 Monate)</span></label>
+        <label class="chip"><input type="checkbox" name="sym" value="meds" id="sym-meds"><span>Neues Medikament</span></label>
+        <label class="chip"><input type="checkbox" name="sym" value="tight" id="sym-tight"><span>Enge Zöpfe, Dutt, Extensions</span></label>
+      </div>
+    </fieldset>
+  </form>
+</section>
+
+<!-- 4. Ergebnis -->
+<section class="panel" id="result">
+  <div class="panel-head">
+    <h2>4 · Dein Ergebnis</h2>
+    <span class="example-flag" id="exampleFlag">Beispielwerte · mach einen Scan</span>
+  </div>
+  <div class="grid-2">
+    <div style="display:grid;gap:16px;min-width:0">
+      <div class="metrics" id="metrics"></div>
+      <div style="display:grid;gap:8px">
+        <h3 id="scaleTitle">Stadium (Norwood-Skala)</h3>
+        <div class="scale" id="scale"></div>
+        <p class="scale-note" id="scaleNote"></p>
+      </div>
+    </div>
+    <div style="display:grid;gap:12px;min-width:0">
+      <h3>Was auffällt</h3>
+      <div class="findings" id="findings"></div>
+      <div class="btns">
+        <button class="btn" id="saveBtn" type="button">Scan im Verlauf speichern</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Plan -->
+<section class="panel" id="planPanel">
+  <div class="panel-head">
+    <h2>5 · Was du jetzt machen kannst</h2>
+    <span class="muted">Sortiert nach Wichtigkeit für dich</span>
+  </div>
+  <div class="plan" id="plan"></div>
+</section>
+
+<!-- 6. Verlauf -->
+<section class="panel" id="historyPanel">
+  <div class="panel-head">
+    <h2>6 · Verlauf</h2>
+    <span class="muted">Alle 3 Monate scannen, gleiche Bedingungen</span>
+  </div>
+  <div class="table-wrap"><table id="history"></table></div>
+</section>
+
+<!-- Quellen -->
+<section class="panel">
+  <h2>Quellen</h2>
+  <ol class="sources">
+    <li><a href="https://onlinelibrary.wiley.com/doi/10.1111/jocd.70320" target="_blank" rel="noopener">Gupta et al. 2025, Netzwerk-Metaanalyse Minoxidil vs. 5-Alpha-Reduktase-Hemmer (J Cosmet Dermatol)</a></li>
+    <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12537375/" target="_blank" rel="noopener">Metaanalyse: Minoxidil + Finasterid als Lösung vs. Minoxidil allein (2025)</a></li>
+    <li><a href="https://anndermatol.org/DOIx.php?id=10.5021%2Fad.25.042" target="_blank" rel="noopener">Updates in Treatment for Androgenetic Alopecia (Annals of Dermatology 2025)</a></li>
+    <li><a href="https://www.dovepress.com/consensus-recommendations-for-the-management-of-androgenetic-alopecia--peer-reviewed-fulltext-article-CCID" target="_blank" rel="noopener">Konsens-Empfehlungen zur Behandlung der androgenetischen Alopezie (CCID)</a></li>
+    <li><a href="https://orca.cardiff.ac.uk/id/eprint/114746/1/Efficacy%20of%20non%20surgical%20treatments%20V%20PIGUET.pdf" target="_blank" rel="noopener">Wirksamkeit nicht-operativer Behandlungen, Netzwerk-Metaanalyse (Cardiff/Piguet)</a></li>
+    <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10251294/" target="_blank" rel="noopener">Low-Level-Lasertherapie bei androgenetischer Alopezie (Review)</a></li>
+    <li><a href="https://www.medicalnewstoday.com/articles/327001" target="_blank" rel="noopener">Norwood-Skala: Stadien der Glatzenbildung (Medical News Today)</a></li>
+    <li><a href="https://ishrs.org/telogen-effluvium/" target="_blank" rel="noopener">Telogenes Effluvium, vorübergehender Haarausfall (ISHRS)</a></li>
+    <li><a href="https://onlinelibrary.wiley.com/doi/10.1111/jocd.16512" target="_blank" rel="noopener">Ferritin, Vitamin D, B12, Schilddrüse, Zink bei telogenem Effluvium (2024)</a></li>
+    <li><a href="https://www.aad.org/public/diseases/hair-loss/types/alopecia" target="_blank" rel="noopener">Alopecia areata (American Academy of Dermatology)</a></li>
+    <li><a href="https://perfecthairhealth.com/rosemary-oil-for-hair-growth/" target="_blank" rel="noopener">Rosmarinöl: was die Studie wirklich zeigt</a></li>
+  </ol>
+  <p class="disclaimer">HaarScan ist keine Diagnose. Die Messung ist eine Schätzung aus einem Foto und hängt von Licht, Kamerawinkel und Frisur ab. Verschreibungspflichtige Mittel (Finasterid, Dutasterid, Minoxidil-Tabletten, Spironolacton) nur nach Rücksprache mit Hautärztin oder Hautarzt. Bei plötzlichem, fleckigem oder schmerzhaftem Haarausfall bitte zeitnah ärztlich abklären lassen.</p>
+</section>
+
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const IRIS_MM = 11.7;
+
+/* ---------- Gesichtserkennung (MediaPipe Face Landmarker, läuft lokal im Browser) ---------- */
+const SOURCES = [
+  { bundle: './vendor/vision_bundle.mjs', wasm: './vendor/wasm', model: './models/face_landmarker.task' },
+  { bundle: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/vision_bundle.mjs',
+    wasm: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/wasm',
+    model: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task' },
+];
+let landmarkerPromise = null;
+function getLandmarker() {
+  if (!landmarkerPromise) {
+    landmarkerPromise = (async () => {
+      const abs = (u) => new URL(u, location.href).href;
+      let lastErr;
+      for (const s of SOURCES) {
+        try {
+          const mod = await import(abs(s.bundle));
+          const fileset = await mod.FilesetResolver.forVisionTasks(abs(s.wasm));
+          return await mod.FaceLandmarker.createFromOptions(fileset, {
+            baseOptions: { modelAssetPath: abs(s.model) }, runningMode: 'IMAGE', numFaces: 1,
+          });
+        } catch (e) { lastErr = e; console.warn('Landmarker-Quelle fehlgeschlagen:', s.bundle, e); }
+      }
+      throw lastErr;
+    })().catch((e) => { landmarkerPromise = null; throw e; });
+  }
+  return landmarkerPromise;
+}
+
+/* ---------- Farbraum ---------- */
+const LIN = new Float32Array(256);
+for (let i = 0; i < 256; i++) { const c = i / 255; LIN[i] = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function lab(r, g, b) {
+  const R = LIN[r | 0], G = LIN[g | 0], B = LIN[b | 0];
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const fx = f((R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047);
+  const fy = f(R * 0.2126 + G * 0.7152 + B * 0.0722);
+  const fz = f((R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883);
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+const median = (arr) => { const a = [...arr].sort((x, y) => x - y); const n = a.length; return n ? (n % 2 ? a[(n - 1) / 2] : (a[n / 2 - 1] + a[n / 2]) / 2) : 0; };
+const pct = (arr, p) => { const a = [...arr].sort((x, y) => x - y); return a.length ? a[clamp(Math.round(p * (a.length - 1)), 0, a.length - 1)] : 0; };
+
+/* ---------- Bild laden ---------- */
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Bild konnte nicht gelesen werden.')); };
+    img.src = url;
+  });
+}
+function toCanvas(src, maxDim = 1400) {
+  const w0 = src.naturalWidth || src.videoWidth || src.width, h0 = src.naturalHeight || src.videoHeight || src.height;
+  const s = Math.min(1, maxDim / Math.max(w0, h0));
+  const c = document.createElement('canvas');
+  c.width = Math.round(w0 * s); c.height = Math.round(h0 * s);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+function rotateCanvas(src, angle, cx, cy) {
+  const c = document.createElement('canvas');
+  c.width = src.width; c.height = src.height;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height);
+  g.translate(cx, cy); g.rotate(angle); g.translate(-cx, -cy);
+  g.drawImage(src, 0, 0);
+  return c;
+}
+
+function cropToHead(src, l) {
+  const W = src.width, H = src.height;
+  const xs = l.map((p) => p.x * W), ys = l.map((p) => p.y * H);
+  const fx0 = Math.min(...xs), fx1 = Math.max(...xs), fy0 = Math.min(...ys), fy1 = Math.max(...ys);
+  const fw = fx1 - fx0, fh = fy1 - fy0;
+  const x0 = Math.max(0, fx0 - 0.45 * fw), x1 = Math.min(W, fx1 + 0.45 * fw);
+  const y0 = Math.max(0, fy0 - 0.75 * fh), y1 = Math.min(H, fy1 + 0.12 * fh);
+  const cw = x1 - x0, ch = y1 - y0;
+  if (cw < 40 || ch < 40 || (cw > 0.9 * W && ch > 0.9 * H)) return null;
+  const s = clamp(900 / cw, 0.5, 3);
+  const c = document.createElement('canvas');
+  c.width = Math.round(cw * s); c.height = Math.round(ch * s);
+  const g = c.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(src, x0, y0, cw, ch, 0, 0, c.width, c.height);
+  return c;
+}
+
+/* ---------- Stirn-Analyse ---------- */
+const BROW_POINTS = [70, 63, 105, 66, 107, 336, 296, 334, 293, 300];
+const SKIN_POINTS = [151, 9, 108, 337, 109, 338];
+
+function measureFront(canvas, lms) {
+  const W = canvas.width, H = canvas.height;
+  const P = (i) => ({ x: lms[i].x * W, y: lms[i].y * H });
+  const data = canvas.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+  const px = (x, y) => { const i = ((y | 0) * W + (x | 0)) * 4; return [data[i], data[i + 1], data[i + 2]]; };
+
+  const browY = (P(105).y + P(334).y + P(66).y + P(296).y) / 4;
+  const browTop = Math.min(...BROW_POINTS.map((i) => P(i).y));
+  const subnasal = P(2).y, chin = P(152).y;
+  const U = chin - browY;
+  const midThird = subnasal - browY;
+
+  // Maßstab über die Iris
+  const d = (a, b) => Math.hypot(P(a).x - P(b).x, P(a).y - P(b).y);
+  let irisPx = lms.length >= 478 ? (d(469, 471) + d(474, 476)) / 2 : 0;
+  let mmPerPx = irisPx > 4 ? IRIS_MM / irisPx : 125 / U; // Fallback: Brauen–Kinn ≈ 125 mm
+  const scaleSource = irisPx > 4 ? 'iris' : 'face';
+
+  // Hautreferenz von der Stirn
+  const r = Math.max(3, Math.round(0.018 * U));
+  const L = [], A = [], B = [];
+  for (const i of SKIN_POINTS) {
+    const p = P(i);
+    for (let y = p.y - r; y <= p.y + r; y += 1) for (let x = p.x - r; x <= p.x + r; x += 1) {
+      if (x < 0 || y < 0 || x >= W || y >= H) continue;
+      const [l, a, b] = lab(...px(x, y)); L.push(l); A.push(a); B.push(b);
+    }
+  }
+  const skin = { L: median(L), a: median(A), b: median(B) };
+  const madL = median(L.map((v) => Math.abs(v - skin.L))) * 1.48;
+  const madC = median(A.map((v, k) => Math.hypot(v - skin.a, B[k] - skin.b))) * 1.48;
+  const tL = clamp(2.5 * madL + 10, 12, 28);
+  const tC = clamp(2.5 * madC + 6, 8, 20);
+
+  // Spalten über die Stirnbreite abtasten
+  const xs = [P(54).x, P(284).x, P(103).x, P(332).x];
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), fw = x1 - x0;
+  const ex0 = clamp(x0 - 0.04 * fw, 1, W - 2), ex1 = clamp(x1 + 0.04 * fw, 1, W - 2);
+  const N = 49, sw = Math.max(2, Math.round(fw / 110));
+  const startY = Math.round(browTop - 0.05 * U);
+  const endY = Math.max(0, Math.round(browY - 1.3 * U));
+  const K = Math.max(4, Math.round(0.035 * U));
+  const profile = [];
+  for (let k = 0; k < N; k++) {
+    const x = ex0 + ((ex1 - ex0) * k) / (N - 1);
+    let run = 0, hit = null;
+    for (let y = startY; y >= endY; y--) {
+      let rs = 0, gs = 0, bs = 0, n = 0;
+      for (let yy = y - 1; yy <= y + 1; yy++) for (let xx = x - sw; xx <= x + sw; xx++) {
+        if (yy < 0 || yy >= H) continue;
+        const i = ((yy | 0) * W + (xx | 0)) * 4; rs += data[i]; gs += data[i + 1]; bs += data[i + 2]; n++;
+      }
+      const [l, a, b] = lab(rs / n, gs / n, bs / n);
+      const non = skin.L - l > tL || Math.hypot(a - skin.a, b - skin.b) > tC;
+      if (non) { run++; if (run >= K) { hit = y + K - 1; break; } } else run = 0;
+    }
+    profile.push({ x, y: hit ?? endY, found: hit !== null });
+  }
+  // Glätten (Median aus 3)
+  const sm = profile.map((p, k) => ({ ...p, y: median([profile[Math.max(0, k - 1)].y, p.y, profile[Math.min(N - 1, k + 1)].y]) }));
+
+  const h = (p) => browY - p.y;
+  const zone = (a, b) => sm.filter((_, k) => k >= Math.round(a * (N - 1)) && k <= Math.round(b * (N - 1)));
+  const center = zone(0.42, 0.58);
+  const leftZ = zone(0.06, 0.34), rightZ = zone(0.66, 0.94);
+  const peak = (z) => { const target = pct(z.map(h), 0.8); return z.reduce((best, p) => (Math.abs(h(p) - target) < Math.abs(h(best) - target) ? p : best), z[0]); };
+  const cY = browY - median(center.map(h));
+  const cX = center[Math.floor(center.length / 2)].x;
+  const lP = peak(leftZ), rP = peak(rightZ);
+
+  // Kopfhaltung prüfen
+  const nose = P(1).x, mid = (P(234).x + P(454).x) / 2, span = Math.abs(P(454).x - P(234).x);
+  const yaw = (nose - mid) / span;
+
+  const foundRatio = sm.filter((p) => p.found).length / N;
+  const topClipped = endY <= 0 && sm.some((p) => !p.found);
+
+  return {
+    browY, U, midThird, mmPerPx, scaleSource, irisPx, yaw, foundRatio, topClipped, profile: sm, endY,
+    handles: { L: { x: lP.x, y: lP.y }, M: { x: cX, y: cY }, R: { x: rP.x, y: rP.y } },
+    lowThird: chin - subnasal,
+  };
+}
+
+function frontMetrics(m) {
+  const hM = (m.browY - m.handles.M.y) * m.mmPerPx;
+  const hL = (m.browY - m.handles.L.y) * m.mmPerPx;
+  const hR = (m.browY - m.handles.R.y) * m.mmPerPx;
+  // Bild ist ungespiegelt: linke Bildseite = rechte Kopfseite
+  return {
+    foreheadMM: hM,
+    recRightMM: hL - hM, recLeftMM: hR - hM,
+    recMM: Math.max(hL, hR) - hM,
+    ratio: (m.browY - m.handles.M.y) / m.midThird,
+  };
+}
+
+/* ---------- Zeichnen Stirn ---------- */
+const front = { canvas: $('#frontCanvas'), img: null, m: null, drag: null };
+function drawFront() {
+  const { canvas, img, m } = front;
+  if (!img) return;
+  const g = canvas.getContext('2d');
+  g.drawImage(img, 0, 0);
+  if (!m) return;
+  const lw = Math.max(2, canvas.width / 400);
+  const font = Math.max(12, Math.round(canvas.width / 48));
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  // Brauenlinie
+  g.strokeStyle = 'rgba(111,227,220,.95)'; g.lineWidth = lw; g.setLineDash([lw * 4, lw * 3]);
+  g.beginPath(); g.moveTo(m.profile[0].x - 20, m.browY); g.lineTo(m.profile.at(-1).x + 20, m.browY); g.stroke();
+  g.setLineDash([]);
+  // erkannter Haaransatz
+  g.strokeStyle = 'rgba(255,179,92,.95)'; g.lineWidth = lw * 1.4;
+  g.beginPath(); m.profile.forEach((p, i) => (i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y))); g.stroke();
+  // Messlinien
+  const met = frontMetrics(m);
+  const label = (txt, x, y) => {
+    g.font = `600 ${font}px "JetBrains Mono", monospace`;
+    const w = g.measureText(txt).width + font * 0.8;
+    g.fillStyle = 'rgba(10,20,20,.78)'; g.fillRect(x - w / 2, y - font * 0.85, w, font * 1.35);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.fillText(txt, x, y + font * 0.2);
+  };
+  for (const key of ['L', 'M', 'R']) {
+    const p = m.handles[key];
+    g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = lw;
+    g.beginPath(); g.moveTo(p.x, m.browY); g.lineTo(p.x, p.y); g.stroke();
+    g.fillStyle = key === 'M' ? '#ffb35c' : '#ff7a59';
+    g.strokeStyle = '#111'; g.lineWidth = lw;
+    g.beginPath(); g.arc(p.x, p.y, Math.max(8, canvas.width / 70), 0, Math.PI * 2); g.fill(); g.stroke();
+    g.fillStyle = '#111'; g.font = `700 ${Math.round(font * 0.85)}px "JetBrains Mono", monospace`; g.textAlign = 'center';
+    g.fillText(key, p.x, p.y + font * 0.3);
+  }
+  const mm = (v) => `${Math.round(v)} mm`;
+  label(mm(met.foreheadMM), m.handles.M.x, (m.handles.M.y + m.browY) / 2);
+  label(`+${Math.max(0, Math.round(met.recRightMM))}`, m.handles.L.x, m.handles.L.y - font * 1.6);
+  label(`+${Math.max(0, Math.round(met.recLeftMM))}`, m.handles.R.x, m.handles.R.y - font * 1.6);
+}
+
+function canvasPoint(canvas, ev) {
+  const r = canvas.getBoundingClientRect();
+  return { x: ((ev.clientX - r.left) / r.width) * canvas.width, y: ((ev.clientY - r.top) / r.height) * canvas.height, scale: canvas.width / r.width };
+}
+front.canvas.addEventListener('pointerdown', (ev) => {
+  if (!front.m) return;
+  const p = canvasPoint(front.canvas, ev);
+  let best = null, bd = 34 * p.scale;
+  for (const k of ['L', 'M', 'R']) { const h = front.m.handles[k]; const dd = Math.hypot(h.x - p.x, h.y - p.y); if (dd < bd) { bd = dd; best = k; } }
+  if (best) { front.drag = best; front.canvas.setPointerCapture(ev.pointerId); ev.preventDefault(); }
+});
+front.canvas.addEventListener('pointermove', (ev) => {
+  if (!front.drag) return;
+  const p = canvasPoint(front.canvas, ev);
+  const h = front.m.handles[front.drag];
+  h.y = clamp(p.y, 0, front.m.browY - 2);
+  if (front.drag !== 'M') h.x = clamp(p.x, 0, front.canvas.width);
+  drawFront();
+});
+const endDrag = () => { if (front.drag) { front.drag = null; state.front = frontMetrics(front.m); state.example = false; render(); } };
+front.canvas.addEventListener('pointerup', endDrag);
+front.canvas.addEventListener('pointercancel', endDrag);
+
+function setStatus(el, text, kind = '') { el.textContent = text; el.className = 'status' + (kind ? ' ' + kind : ''); }
+
+async function analyzeFrontSource(src) {
+  const status = $('#frontStatus');
+  $('#frontEmpty').hidden = true; $('#frontBusy').hidden = false;
+  try {
+    let c = toCanvas(src);
+    front.img = c; front.m = null;
+    front.canvas.width = c.width; front.canvas.height = c.height; front.canvas.hidden = false; drawFront();
+    setStatus(status, 'Lade Gesichtserkennung… (beim ersten Mal ein paar Sekunden)');
+    const lmk = await getLandmarker();
+    let res = lmk.detect(c);
+    if (!res.faceLandmarks?.length) throw new Error('Kein Gesicht gefunden. Schau gerade in die Kamera und sorg für mehr Licht.');
+    // Neigung ausgleichen, damit die Augen waagerecht liegen
+    let l = res.faceLandmarks[0];
+    const e1 = { x: l[33].x * c.width, y: l[33].y * c.height }, e2 = { x: l[263].x * c.width, y: l[263].y * c.height };
+    const roll = Math.atan2(e2.y - e1.y, e2.x - e1.x);
+    if (Math.abs(roll) > 0.02) {
+      c = rotateCanvas(c, -roll, (e1.x + e2.x) / 2, (e1.y + e2.y) / 2);
+      const res2 = lmk.detect(c);
+      if (res2.faceLandmarks?.length) { l = res2.faceLandmarks[0]; } else { c = toCanvas(src); }
+    }
+    // Auf den Kopf zuschneiden, damit Messung und Anzeige groß genug sind
+    const crop = cropToHead(c, l);
+    if (crop) {
+      const res3 = lmk.detect(crop);
+      if (res3.faceLandmarks?.length) { c = crop; l = res3.faceLandmarks[0]; }
+    }
+    front.img = c; front.canvas.width = c.width; front.canvas.height = c.height;
+    front.m = measureFront(c, l);
+    state.front = frontMetrics(front.m);
+    state.frontQuality = front.m;
+    state.example = false;
+    drawFront();
+    const warn = [];
+    if (Math.abs(front.m.yaw) > 0.08) warn.push('Kopf ist etwas zur Seite gedreht, die Seiten werden ungenau.');
+    if (front.m.topClipped) warn.push('Oben ist zu wenig Platz im Bild oder der Haaransatz ist sehr weit hinten. Prüf den Punkt M.');
+    if (front.m.foundRatio < 0.6) warn.push('Der Haaransatz war schwer zu erkennen (Pony, Schatten oder helle Haare?). Zieh die Punkte L, M, R an die richtige Stelle.');
+    if (front.m.scaleSource !== 'iris') warn.push('Iris nicht messbar, Millimeter sind grob geschätzt.');
+    if (warn.length) setStatus(status, warn.join(' '), 'warn');
+    else setStatus(status, 'Scan fertig. Stimmen die Punkte L, M, R nicht genau? Zieh sie an die Haarkante, die Werte rechnen sich neu.', 'ok');
+    render();
+  } catch (e) {
+    console.error(e);
+    setStatus(status, (e && e.message && !/fetch|import|wasm/i.test(e.message)) ? e.message : 'Die Gesichtserkennung konnte nicht geladen werden. Prüf deine Internetverbindung und lade die Seite neu.', 'bad');
+  } finally { $('#frontBusy').hidden = true; }
+}
+
+for (const id of ['#frontCapture', '#frontPick']) {
+  $(id).addEventListener('change', async (ev) => {
+    const f = ev.target.files?.[0]; ev.target.value = '';
+    if (!f) return;
+    try { stopLive(); await analyzeFrontSource(await loadImage(f)); } catch (e) { setStatus($('#frontStatus'), e.message, 'bad'); }
+  });
+}
+
+/* ---------- Live-Kamera ---------- */
+let stream = null;
+const video = $('#video');
+function stopLive() {
+  if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
+  video.hidden = true; $('#shutter').hidden = true; $('#guide').hidden = true;
+}
+$('#liveBtn').addEventListener('click', async () => {
+  if (stream) { stopLive(); return; }
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error('no-media');
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+    video.srcObject = stream; await video.play();
+    $('#frontEmpty').hidden = true; front.canvas.hidden = true;
+    video.hidden = false; $('#shutter').hidden = false; $('#guide').hidden = false;
+    setStatus($('#frontStatus'), 'Gesicht in die Schablone, Haare zurück, dann „Auslösen“.');
+  } catch (e) {
+    stopLive();
+    setStatus($('#frontStatus'), 'Live-Kamera ist hier nicht erlaubt. Nimm „Selfie aufnehmen“, auf dem Handy öffnet sich damit direkt die Kamera.', 'warn');
+  }
+});
+$('#shutter').addEventListener('click', async () => {
+  const c = toCanvas(video);
+  stopLive();
+  await analyzeFrontSource(c);
+});
+
+/* ---------- Oberkopf-Analyse ---------- */
+const crown = { canvas: $('#crownCanvas'), img: null, cx: 0.5, cy: 0.5 };
+function otsu(values) {
+  const hist = new Array(256).fill(0);
+  for (const v of values) hist[v | 0]++;
+  const total = values.length; let sum = 0;
+  for (let i = 0; i < 256; i++) sum += i * hist[i];
+  let sumB = 0, wB = 0, best = 0, thr = 128;
+  for (let t = 0; t < 256; t++) {
+    wB += hist[t]; if (!wB) continue;
+    const wF = total - wB; if (!wF) break;
+    sumB += t * hist[t];
+    const mB = sumB / wB, mF = (sum - sumB) / wF;
+    const between = wB * wF * (mB - mF) ** 2;
+    if (between > best) { best = between; thr = t; }
+  }
+  return thr;
+}
+function analyzeCrown() {
+  const { canvas, img } = crown;
+  const W = canvas.width, H = canvas.height;
+  const g = canvas.getContext('2d', { willReadFrequently: true });
+  g.drawImage(img, 0, 0);
+  const id = g.getImageData(0, 0, W, H), d = id.data;
+  const R = Math.round(0.3 * Math.min(W, H));
+  const cx = crown.cx * W, cy = crown.cy * H;
+  const idx = [], Ys = [];
+  for (let y = Math.max(0, cy - R) | 0; y < Math.min(H, cy + R); y++) {
+    for (let x = Math.max(0, cx - R) | 0; x < Math.min(W, cx + R); x++) {
+      if ((x - cx) ** 2 + (y - cy) ** 2 > R * R) continue;
+      const i = (y * W + x) * 4;
+      idx.push(i); Ys.push(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+    }
+  }
+  const thr = otsu(Ys);
+  let scalp = 0, hairY = 0, hairN = 0;
+  for (let k = 0; k < idx.length; k++) {
+    const i = idx[k], r = d[i], gg = d[i + 1], b = d[i + 2], Y = Ys[k];
+    const cb = 128 - 0.168736 * r - 0.331264 * gg + 0.5 * b;
+    const cr = 128 + 0.5 * r - 0.418688 * gg - 0.081312 * b;
+    const skinChroma = cb >= 77 && cb <= 127 && cr >= 133 && cr <= 173;
+    if (skinChroma && Y > thr) {
+      scalp++;
+      d[i] = Math.min(255, r * 0.45 + 140); d[i + 1] = gg * 0.45; d[i + 2] = b * 0.45;
+    } else { hairY += Y; hairN++; }
+  }
+  g.putImageData(id, 0, 0);
+  g.lineWidth = Math.max(2, W / 300); g.strokeStyle = 'rgba(255,255,255,.95)'; g.setLineDash([10, 8]);
+  g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+  const share = idx.length ? scalp / idx.length : 0;
+  const lightHair = hairN && hairY / hairN > 140;
+  state.crown = { pct: share * 100, lightHair };
+  state.example = false;
+  setStatus($('#crownStatus'),
+    lightHair ? 'Fertig. Achtung: helle Haare, die Messung kann zu niedrig sein. Tippe aufs Bild, um den Kreis zu verschieben.'
+      : 'Fertig. Tippe auf das Bild, um den Messkreis auf die dünnste Stelle zu setzen.', lightHair ? 'warn' : 'ok');
+  render();
+}
+for (const id of ['#crownCapture', '#crownPick']) {
+  $(id).addEventListener('change', async (ev) => {
+    const f = ev.target.files?.[0]; ev.target.value = '';
+    if (!f) return;
+    try {
+      const img = await loadImage(f);
+      crown.img = toCanvas(img, 1000); crown.cx = 0.5; crown.cy = 0.5;
+      crown.canvas.width = crown.img.width; crown.canvas.height = crown.img.height;
+      crown.canvas.hidden = false; $('#crownEmpty').hidden = true;
+      analyzeCrown();
+    } catch (e) { setStatus($('#crownStatus'), e.message, 'bad'); }
+  });
+}
+crown.canvas.addEventListener('pointerdown', (ev) => {
+  if (!crown.img) return;
+  const p = canvasPoint(crown.canvas, ev);
+  crown.cx = p.x / crown.canvas.width; crown.cy = p.y / crown.canvas.height;
+  analyzeCrown();
+});
+
+/* ---------- Fragebogen ---------- */
+function readQuiz() {
+  const f = $('#quiz');
+  const val = (n) => f.querySelector(`input[name="${n}"]:checked`)?.value;
+  const set = (n) => new Set([...f.querySelectorAll(`input[name="${n}"]:checked`)].map((i) => i.value));
+  return { sex: val('sex'), age: val('age'), onset: val('onset'), family: val('family'), patterns: set('pattern'), sym: set('sym') };
+}
+$('#quiz').addEventListener('change', () => { saveQuiz(); render(); });
+$('#quiz').addEventListener('submit', (e) => e.preventDefault());
+function saveQuiz() {
+  try {
+    const q = readQuiz();
+    localStorage.setItem('haarscan.quiz', JSON.stringify({ ...q, patterns: [...q.patterns], sym: [...q.sym] }));
+  } catch (_) { /* Speicher nicht verfügbar */ }
+}
+function restoreQuiz() {
+  try {
+    const q = JSON.parse(localStorage.getItem('haarscan.quiz') || 'null');
+    if (!q) return;
+    const f = $('#quiz');
+    for (const n of ['sex', 'age', 'onset', 'family']) { const el = f.querySelector(`input[name="${n}"][value="${q[n]}"]`); if (el) el.checked = true; }
+    for (const [n, arr] of [['pattern', q.patterns], ['sym', q.sym]]) for (const v of arr || []) { const el = f.querySelector(`input[name="${n}"][value="${v}"]`); if (el) el.checked = true; }
+  } catch (_) { /* ignorieren */ }
+}
+
+/* ---------- Bewertung ---------- */
+const state = { front: { foreheadMM: 68, recRightMM: 15, recLeftMM: 12, recMM: 15, ratio: 1.08 }, crown: { pct: 21, lightHair: false }, example: true, frontQuality: null };
+
+function stage(ctx) {
+  const f = ctx.front, c = ctx.crown;
+  if (ctx.q.sex === 'w') {
+    if (!c) return null;
+    const p = c.pct;
+    const n = p < 15 ? 0 : p < 30 ? 1 : p < 50 ? 2 : 3;
+    return { scale: 'ludwig', n, label: ['Kein Befund', 'Ludwig I', 'Ludwig II', 'Ludwig III'][n] };
+  }
+  if (!f) return null;
+  let n = f.recMM < 8 ? 1 : f.recMM < 17 ? 2 : f.recMM < 28 ? 3 : 4;
+  let suffix = '';
+  if (f.foreheadMM > 80 && n < 3) { n = 3; suffix = 'a'; }
+  if (c) {
+    if (c.pct >= 50 && n >= 3) n = Math.max(n, 5);
+    else if (c.pct >= 30 && n === 3) suffix = ' Vertex';
+    else if (c.pct >= 30 && n < 3) suffix = ' + Wirbel';
+  }
+  const roman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][n];
+  return { scale: 'norwood', n, label: `Norwood ${roman}${suffix}` };
+}
+
+function assess() {
+  const q = readQuiz();
+  const ctx = { q, front: state.front, crown: state.crown };
+  ctx.stage = stage(ctx);
+  const f = ctx.front, c = ctx.crown;
+  ctx.aga = (ctx.stage && ((ctx.stage.scale === 'norwood' && ctx.stage.n >= 2) || (ctx.stage.scale === 'ludwig' && ctx.stage.n >= 1)))
+    || q.patterns.has('temples') || q.patterns.has('crown') || q.patterns.has('part') || (c && c.pct >= 25);
+  ctx.te = q.onset === 'sudden' || q.sym.has('stress') || q.sym.has('birth') || q.sym.has('meds') || (q.patterns.has('diffuse') && q.onset !== 'slow');
+  ctx.aa = q.patterns.has('patches');
+  ctx.inflam = q.sym.has('red');
+  ctx.seb = q.sym.has('itch');
+  ctx.deficit = q.sym.has('tired') || ctx.te || q.sex === 'w';
+  ctx.traction = q.sym.has('tight');
+  ctx.early = ctx.stage && ctx.stage.scale === 'norwood' && ctx.stage.n <= 2;
+  ctx.male = q.sex !== 'w';
+  return ctx;
+}
+
+const fmt = (v, d = 0) => (v == null || isNaN(v) ? '–' : v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d }));
+
+function findings(ctx) {
+  const out = [];
+  const f = ctx.front, c = ctx.crown, q = ctx.q;
+  if (f) {
+    const r = f.recMM;
+    if (r < 8) out.push(['ok', 'Geheimratsecken unauffällig', `Die Schläfen liegen nur ${fmt(Math.max(0, r))} mm höher als die Stirnmitte.`]);
+    else if (r < 17) out.push(['warn', 'Leichte Geheimratsecken', `Die Schläfen liegen ${fmt(r)} mm höher als die Mitte. Bei Männern ist das oft der normale „reife Haaransatz“, kann aber der Anfang sein. Beobachten.`]);
+    else if (r < 28) out.push(['bad', 'Deutliche Geheimratsecken', `${fmt(r)} mm Rückgang an den Schläfen. Das passt zu erblich bedingtem Haarausfall (androgenetische Alopezie). Früh behandeln lohnt sich am meisten.`]);
+    else out.push(['bad', 'Starke Geheimratsecken', `${fmt(r)} mm Rückgang an den Schläfen. Medikamente können den Rest erhalten. Für die Ecken selbst ist oft eine Transplantation die einzige sichtbare Lösung.`]);
+    if (Math.abs(f.recLeftMM - f.recRightMM) > 8) out.push(['warn', 'Ungleiche Seiten', `Links ${fmt(Math.max(0, f.recLeftMM))} mm, rechts ${fmt(Math.max(0, f.recRightMM))} mm. Kann am Kamerawinkel liegen. Mit geradem Foto wiederholen.`]);
+    const fm = f.foreheadMM;
+    const hi = q.sex === 'w' ? 65 : 70;
+    if (fm > hi + 10) out.push(['bad', 'Haaransatz insgesamt weit hinten', `${fmt(fm)} mm von den Brauen bis zum Haaransatz. Üblich sind etwa 50–${hi} mm.`]);
+    else if (fm > hi) out.push(['warn', 'Hohe Stirn', `${fmt(fm)} mm von den Brauen bis zum Haaransatz. Üblich sind etwa 50–${hi} mm. Kann angeboren sein; mit Fotos vom letzten Jahr vergleichen.`]);
+    else out.push(['ok', 'Stirnhöhe im normalen Bereich', `${fmt(fm)} mm von den Brauen bis zum Haaransatz.`]);
+  } else {
+    out.push(['neutral', 'Noch kein Stirn-Scan', 'Mach in Schritt 1 ein Selfie, dann wird der Haaransatz vermessen.']);
+  }
+  if (c) {
+    const p = c.pct;
+    if (p < 15) out.push(['ok', 'Oberkopf dicht', `Nur ${fmt(p)} % Kopfhaut sichtbar im Messkreis.`]);
+    else if (p < 30) out.push(['warn', 'Oberkopf etwas lichter', `${fmt(p)} % Kopfhaut sichtbar. Mit Licht von oben ist das teils normal; im Verlauf beobachten.`]);
+    else out.push(['bad', 'Oberkopf deutlich licht', `${fmt(p)} % Kopfhaut sichtbar. Das spricht für Haarausfall am Wirbel/Scheitel.`]);
+    if (c.lightHair) out.push(['neutral', 'Helle Haare', 'Die Kopfhaut-Messung ist bei hellen Haaren unsicherer.']);
+  }
+  if (ctx.aa) out.push(['bad', 'Runde kahle Stellen', 'Das kann kreisrunder Haarausfall (Alopecia areata) sein, eine Autoimmun-Erkrankung. Bitte beim Hautarzt abklären.']);
+  if (ctx.inflam) out.push(['bad', 'Entzündung der Kopfhaut', 'Rötung, Schmerz oder Pusteln mit Haarausfall können zu vernarbendem Haarausfall führen. Zeitnah zum Hautarzt.']);
+  if (ctx.te) out.push(['warn', 'Hinweis auf Schub-Haarausfall', 'Plötzlicher Ausfall 2–3 Monate nach Stress, Krankheit, Diät, Geburt oder neuem Medikament ist oft telogenes Effluvium. Das wächst meist in 3–6 Monaten nach.']);
+  if (ctx.seb) out.push(['warn', 'Jucken / Schuppen', 'Eine gereizte Kopfhaut (z. B. seborrhoisches Ekzem) kann Haarausfall verstärken und ist gut behandelbar.']);
+  if (q.family === 'yes' && ctx.aga) out.push(['warn', 'Familiäre Veranlagung', 'Glatzen in der Familie plus dein Muster: sehr wahrscheinlich erblich bedingter Haarausfall.']);
+  return out;
+}
+
+/* Empfehlungen: Inhalt aus Leitlinien und Studien (siehe Quellen) */
+const RECS = [
+  { id: 'doc', title: 'Hautarzt / Hautärztin aufsuchen', kind: 'Arzt', ev: 'Wichtig',
+    show: () => true,
+    prio: (c) => (c.aa || c.inflam ? 100 : c.te || c.q.sex === 'w' || c.q.age === 'u20' ? 80 : c.aga ? 55 : 10),
+    what: 'Eine Trichoskopie (Kopfhaut unter Vergrößerung) klärt in Minuten, welche Art Haarausfall es ist. Das entscheidet, was wirkt.',
+    how: 'Termin machen, diese Auswertung und Fotos mitnehmen. Sag, seit wann es auffällt und ob es in der Familie vorkommt.',
+    note: 'Sofort hin bei runden kahlen Stellen, Schmerzen, Rötung oder Ausfall in Büscheln.' },
+  { id: 'blood', title: 'Blutwerte prüfen lassen', kind: 'Arzt', ev: 'Belegt',
+    show: (c) => c.deficit || c.te,
+    prio: (c) => (c.te ? 90 : 60),
+    what: 'Eisenmangel, Schilddrüse, Vitamin-D-, B12- und Zinkmangel gehören zu den häufigsten behebbaren Ursachen für diffusen Haarausfall.',
+    how: 'Beim Hausarzt nach Ferritin, TSH, Vitamin D, B12 und Zink fragen. Nur fehlende Werte auffüllen.',
+    note: 'Biotin vorher absetzen: Es verfälscht Laborwerte (u. a. Schilddrüse).' },
+  { id: 'minox', title: 'Minoxidil 5 % (Schaum oder Lösung)', kind: 'Rezeptfrei', ev: 'Stark belegt',
+    show: (c) => c.aga && !c.aa,
+    prio: (c) => (c.early ? 85 : 75),
+    what: 'Wirksamstes Mittel zum Auftragen. Verlängert die Wachstumsphase und macht dünne Haare wieder dicker. Wirkt am Wirbel besser als an den Ecken.',
+    how: 'Männer: 1 ml Lösung oder ½ Kappe Schaum, 2× täglich auf die trockene Kopfhaut. Frauen: 5 % Schaum 1× täglich. Mindestens 4–6 Monate durchhalten.',
+    note: 'In den ersten 2–8 Wochen fallen oft mehr Haare aus (Shedding): ein gutes Zeichen. Wirkt nur, solange man es nimmt. Kopfhautreizung möglich; nicht für Schwangere.' },
+  { id: 'fin', title: 'Finasterid 1 mg', kind: 'Rezept', ev: 'Stark belegt',
+    show: (c) => c.aga && c.male && !c.aa,
+    prio: (c) => (c.early ? 80 : 78),
+    what: 'Senkt das Hormon DHT in der Kopfhaut um etwa 60–70 %. Stoppt bei den meisten Männern das Fortschreiten, oft wachsen Haare nach. Hilft auch an den Geheimratsecken.',
+    how: '1 Tablette täglich nach Rezept. Erste Wirkung nach etwa 6 Monaten. Gibt es auch als Spray zum Auftragen mit weniger Wirkung im Blut.',
+    note: 'Selten sexuelle Nebenwirkungen oder Stimmungstiefs, mit dem Arzt besprechen. Nicht für Frauen, die schwanger werden können. Beim Absetzen geht der Haarausfall weiter.' },
+  { id: 'combo', title: 'Kombination Minoxidil + Finasterid', kind: 'Rezept', ev: 'Stark belegt',
+    show: (c) => c.aga && c.male && !c.aa && c.stage && c.stage.n >= 2,
+    prio: () => 72,
+    what: 'Beide Mittel greifen an verschiedenen Stellen an. Studien von 2025 zeigen: zusammen mehr Dichte und dickere Haare als jedes allein.',
+    how: 'Entweder Tablette + Minoxidil getrennt, oder eine fertige Lösung mit beiden Wirkstoffen vom Hautarzt.',
+    note: 'Erst ein Mittel starten, dann das zweite, so erkennst du Nebenwirkungen leichter.' },
+  { id: 'needle', title: 'Microneedling', kind: 'Zuhause', ev: 'Mittel belegt',
+    show: (c) => c.aga && !c.inflam && !c.aa,
+    prio: () => 60,
+    what: 'Winzige Nadeln reizen die Kopfhaut und setzen Wachstumsfaktoren frei. Verstärkt die Wirkung von Minoxidil deutlich.',
+    how: 'Dermaroller oder -pen mit 0,5–1,5 mm, 1× pro Woche auf den betroffenen Stellen. Vorher desinfizieren.',
+    note: 'Minoxidil erst 24 Stunden nach dem Needling wieder auftragen. Nicht bei entzündeter Kopfhaut.' },
+  { id: 'keto', title: 'Ketoconazol-Shampoo 2 %', kind: 'Rezeptfrei', ev: (c) => (c.seb ? 'Gut belegt' : 'Schwach belegt'),
+    show: (c) => c.aga || c.seb,
+    prio: (c) => (c.seb ? 70 : 40),
+    what: 'Wirkt gegen Schuppen und Entzündung der Kopfhaut. Bei erblichem Haarausfall nur ein kleiner Zusatzeffekt.',
+    how: '2–3× pro Woche, 3–5 Minuten einwirken lassen, dann ausspülen.',
+    note: 'Ersetzt kein Minoxidil oder Finasterid, ist aber eine günstige Ergänzung.' },
+  { id: 'oralminox', title: 'Minoxidil als Tablette (niedrig dosiert)', kind: 'Rezept', ev: 'Gut belegt',
+    show: (c) => c.aga && !c.aa,
+    prio: () => 45,
+    what: 'Neue Alternative, wenn die Lösung nervt oder die Kopfhaut reizt. Wachsende Studienlage zeigt ähnliche Wirkung.',
+    how: 'Nur ärztlich, sehr niedrige Dosis (off-label).',
+    note: 'Mögliche Nebenwirkungen: mehr Körperbehaarung, Herzklopfen, Wassereinlagerung. Blutdruck wird kontrolliert.' },
+  { id: 'dut', title: 'Dutasterid', kind: 'Rezept', ev: 'Stark belegt',
+    show: (c) => c.aga && c.male && c.stage && c.stage.n >= 3,
+    prio: () => 35,
+    what: 'Netzwerk-Metaanalyse 2025: Dutasterid 0,5 mg war insgesamt das wirksamste Einzelmittel, stärker als Finasterid.',
+    how: 'Meist erst, wenn Finasterid nicht reicht. In Deutschland off-label, nur über den Hautarzt.',
+    note: 'Ähnliche Nebenwirkungen wie Finasterid, bleibt länger im Körper.' },
+  { id: 'spiro', title: 'Spironolacton', kind: 'Rezept', ev: 'Mittel belegt',
+    show: (c) => c.aga && c.q.sex === 'w',
+    prio: () => 50,
+    what: 'Blockt männliche Hormone. Bei Frauen eine gängige Ergänzung zu Minoxidil.',
+    how: 'Nur ärztlich mit Blutkontrolle.',
+    note: 'Nicht in der Schwangerschaft; sichere Verhütung nötig.' },
+  { id: 'prp', title: 'PRP (Eigenblut-Behandlung)', kind: 'Praxis', ev: 'Mittel belegt',
+    show: (c) => c.aga && !c.aa,
+    prio: () => 32,
+    what: 'Aus deinem Blut gewonnenes Plasma wird in die Kopfhaut gespritzt. Review aus 13 Studien: im Schnitt ca. 30 Haare/cm² mehr als Placebo.',
+    how: 'Meist 3 Sitzungen im Abstand von 4 Wochen, danach Auffrischung alle 4–6 Monate.',
+    note: 'Teuer (ca. 200–500 € pro Sitzung) und keine Kassenleistung. Am besten zusätzlich zu Medikamenten.' },
+  { id: 'lllt', title: 'Rotlicht-Laser (LLLT)', kind: 'Zuhause', ev: 'Mittel belegt',
+    show: (c) => c.aga && !c.aa,
+    prio: () => 28,
+    what: 'Laser-Kappe oder -Helm mit rotem Licht regt die Haarwurzeln an. Sicher, aber kleinerer Effekt als Medikamente.',
+    how: 'Nach Herstellerangabe, meist 3× pro Woche 10–30 Minuten, mindestens 6 Monate.',
+    note: 'Geräte kosten mehrere hundert Euro. Auf echte Laser-Dioden und Zulassung achten.' },
+  { id: 'fue', title: 'Haartransplantation (FUE)', kind: 'Praxis', ev: 'Belegt',
+    show: (c) => c.stage && c.stage.scale === 'norwood' && c.stage.n >= 3 && c.q.age !== 'u20',
+    prio: (c) => (c.stage.n >= 4 ? 58 : 38),
+    what: 'Eigene Haare vom Hinterkopf werden in die Geheimratsecken verpflanzt. Die einzige Methode, die kahle Ecken sicher wieder füllt.',
+    how: 'Erst wenn der Haarausfall stabil ist (meist ab Mitte 20) und am besten mit Finasterid/Minoxidil kombiniert. Mehrere Kliniken vergleichen.',
+    note: 'Ohne Medikamente verlierst du die eigenen Haare um das Transplantat herum weiter. Billig-Angebote kritisch prüfen.' },
+  { id: 'aa', title: 'Kreisrunden Haarausfall behandeln lassen', kind: 'Arzt', ev: 'Belegt',
+    show: (c) => c.aa,
+    prio: () => 95,
+    what: 'Das Immunsystem greift die Haarwurzeln an. Oft wächst es von allein nach, aber es gibt gute Therapien.',
+    how: 'Hautarzt: Kortison-Spritzen oder -Lösung für kleine Stellen; bei großen Flächen neue Tabletten (JAK-Hemmer).',
+    note: 'Achte auch auf Tüpfel oder Rillen in den Fingernägeln und erzähl das dem Arzt.' },
+  { id: 'te', title: 'Schub-Haarausfall: Auslöser finden', kind: 'Alltag', ev: 'Belegt',
+    show: (c) => c.te,
+    prio: () => 85,
+    what: 'Nach einem Auslöser gehen viele Haare gleichzeitig in die Ruhephase und fallen 2–3 Monate später aus. Die Wurzeln bleiben erhalten.',
+    how: 'Auslöser abstellen (Mangel, Crash-Diät, Medikament mit Arzt besprechen). Viel Eiweiß, genug Schlaf. Meist ist nach 3–6 Monaten alles wieder normal.',
+    note: 'Wenn der Ausfall länger als 6 Monate anhält: zum Hautarzt, dahinter kann auch erblicher Haarausfall stecken.' },
+  { id: 'traction', title: 'Zug auf die Haare vermeiden', kind: 'Alltag', ev: 'Belegt',
+    show: (c) => c.traction,
+    prio: () => 82,
+    what: 'Ständiger Zug durch Zöpfe, Dutt oder Extensions zerstört die Haarwurzeln am Rand (Traktionsalopezie), gerade an den Schläfen.',
+    how: 'Frisuren locker tragen und abwechseln, Extensions pausieren, nachts offen schlafen.',
+    note: 'Früh erkannt wachsen die Haare nach; nach Jahren kann der Schaden bleibend sein.' },
+  { id: 'life', title: 'Alltag, der deinen Haaren hilft', kind: 'Alltag', ev: 'Unterstützend',
+    show: () => true,
+    prio: () => 30,
+    what: 'Ersetzt keine Behandlung, aber Mangel und Stress machen jeden Haarausfall schlimmer.',
+    how: 'Genug Eiweiß (ca. 1 g pro kg Körpergewicht), eisenreich essen, 7–9 Stunden Schlaf, nicht rauchen. Mildes Shampoo, nicht heiß föhnen.',
+    note: 'Crash-Diäten sind ein häufiger Auslöser für Schub-Haarausfall.' },
+  { id: 'myth', title: 'Wenig Wirkung: was du dir sparen kannst', kind: 'Info', ev: 'Schwach belegt',
+    show: () => true,
+    prio: () => 20,
+    what: 'Rosmarinöl wurde nur gegen schwaches 2 %-Minoxidil getestet und ist kein Ersatz. Biotin hilft nur bei echtem Mangel. Koffein-Shampoos sind kaum belegt.',
+    how: 'Geld lieber in belegte Mittel (Minoxidil, Finasterid) stecken.',
+    note: 'Vorsicht bei „Wundermitteln“ mit Vorher/Nachher-Fotos ohne Studien.' },
+  { id: 'track', title: 'Verlauf dokumentieren', kind: 'Alltag', ev: 'Wichtig',
+    show: () => true,
+    prio: () => 25,
+    what: 'Haare wachsen nur ca. 1 cm pro Monat. Ob etwas wirkt, siehst du nur im Vergleich über Monate.',
+    how: 'Alle 3 Monate hier scannen: gleiches Licht, gleicher Abstand, Haare gleich gekämmt. Mit „Scan speichern“ sicherst du die Werte.',
+    note: 'Nicht täglich Haare zählen, das macht nur Stress.' },
+];
+
+function evClass(ev) { return /stark|gut|wichtig/i.test(ev) ? 'ok' : /mittel|belegt$/i.test(ev) && !/schwach/i.test(ev) ? '' : 'warn'; }
+
+/* ---------- Ausgabe ---------- */
+function esc(s) { return String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
+
+function headSvg(n, scaleKind) {
+  // Draufsicht auf den Kopf; Haare dunkel, kahle Fläche hell
+  const bald = scaleKind === 'ludwig'
+    ? ['', '<ellipse cx="24" cy="26" rx="3" ry="12"/>', '<ellipse cx="24" cy="26" rx="7" ry="15"/>', '<ellipse cx="24" cy="25" rx="12" ry="18"/>'][n] || ''
+    : [
+      '',
+      '',
+      '<path d="M10 14 Q14 8 18 13 Z M38 14 Q34 8 30 13 Z"/>',
+      '<path d="M9 18 Q12 6 20 14 Z M39 18 Q36 6 28 14 Z"/>',
+      '<path d="M9 20 Q12 4 24 12 Q36 4 39 20 Q32 14 24 18 Q16 14 9 20 Z"/><circle cx="24" cy="34" r="5"/>',
+      '<path d="M8 24 Q10 2 24 6 Q38 2 40 24 Q32 18 24 22 Q16 18 8 24 Z"/><circle cx="24" cy="34" r="8"/>',
+      '<path d="M8 30 Q8 2 24 4 Q40 2 40 30 Q36 40 24 42 Q12 40 8 30 Z"/>',
+      '<path d="M6 34 Q4 2 24 3 Q44 2 42 34 Q36 44 24 45 Q12 44 6 34 Z"/>',
+    ][n] || '';
+  return `<svg viewBox="0 0 48 52" aria-hidden="true"><ellipse cx="24" cy="26" rx="19" ry="23" fill="var(--muted)" opacity=".75"/><g fill="var(--surface)">${bald}</g><path d="M20 3 Q24 0 28 3" fill="none" stroke="var(--muted)" stroke-width="1.5"/></svg>`;
+}
+
+function render() {
+  // Beim ersten echten Scan die Beispielwerte des anderen Scans entfernen
+  if (!state.example && !state.exampleCleared) {
+    state.exampleCleared = true;
+    if (!front.m) state.front = null;
+    if (!crown.img) state.crown = null;
+  }
+  const ctx = assess();
+  const f = ctx.front, c = ctx.crown;
+  $('#exampleFlag').hidden = !state.example;
+
+  // Kennzahlen
+  const sev = (v, a, b) => (v < a ? 'ok' : v < b ? 'warn' : 'bad');
+  const tiles = [];
+  if (f) {
+    const hi = ctx.q.sex === 'w' ? 65 : 70;
+    tiles.push(['Stirnhöhe (Brauen → Ansatz)', `${fmt(f.foreheadMM)}<small> mm</small>`, sev(f.foreheadMM, hi, hi + 10), f.foreheadMM < hi ? 'normal' : f.foreheadMM < hi + 10 ? 'erhöht' : 'hoch']);
+    tiles.push(['Geheimratsecken-Tiefe', `${fmt(Math.max(0, f.recMM))}<small> mm</small>`, sev(f.recMM, 8, 17), f.recMM < 8 ? 'unauffällig' : f.recMM < 17 ? 'leicht' : f.recMM < 28 ? 'deutlich' : 'stark']);
+    tiles.push(['Links / Rechts', `${fmt(Math.max(0, f.recLeftMM))}<small> / </small>${fmt(Math.max(0, f.recRightMM))}<small> mm</small>`, Math.abs(f.recLeftMM - f.recRightMM) > 8 ? 'warn' : 'ok', Math.abs(f.recLeftMM - f.recRightMM) > 8 ? 'ungleich' : 'symmetrisch']);
+  } else {
+    tiles.push(['Stirn-Scan', '–', 'neutral', 'fehlt']);
+  }
+  if (c) tiles.push(['Kopfhaut sichtbar (Oberkopf)', `${fmt(c.pct)}<small> %</small>`, sev(c.pct, 15, 30), c.pct < 15 ? 'dicht' : c.pct < 30 ? 'lichter' : 'licht']);
+  else tiles.push(['Oberkopf-Scan', '–', 'neutral', 'optional']);
+  $('#metrics').innerHTML = tiles.map(([k, v, cls, tag]) => `<div class="metric"><span class="k">${k}</span><span class="v">${v}</span><span class="pill ${cls}">${tag}</span></div>`).join('');
+
+  // Skala
+  const st = ctx.stage;
+  const ludwig = ctx.q.sex === 'w';
+  $('#scaleTitle').textContent = ludwig ? 'Stadium (Ludwig-Skala für Frauen)' : 'Stadium (Norwood-Skala)';
+  const segs = ludwig ? [0, 1, 2, 3] : [1, 2, 3, 4, 5, 6, 7];
+  $('#scale').style.gridTemplateColumns = `repeat(${segs.length}, minmax(0, 1fr))`;
+  $('#scale').innerHTML = segs.map((n) => {
+    const on = st && st.n === n;
+    const lab = ludwig ? ['0', 'I', 'II', 'III'][n] : ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][n];
+    return `<div class="seg${on ? ' on' : ''}" ${on ? 'aria-current="true"' : ''}>${headSvg(n, ludwig ? 'ludwig' : 'norwood')}<span>${lab}</span></div>`;
+  }).join('');
+  $('#scaleNote').textContent = st
+    ? `Geschätzt: ${st.label}. ${ludwig ? 'Bei Frauen zählt vor allem die Dichte am Scheitel.' : 'Ab Stadium III spricht man von behandlungswürdigen Geheimratsecken.'} Ein Foto kann den Arztbefund nicht ersetzen.`
+    : ludwig ? 'Für die Ludwig-Skala brauchst du ein Foto vom Scheitel (Schritt 2).' : 'Für die Einstufung brauchst du ein Stirn-Foto (Schritt 1).';
+
+  // Befunde
+  $('#findings').innerHTML = findings(ctx).map(([cls, t, d]) => `<div class="finding ${cls}"><span class="bar"></span><div class="txt"><b>${esc(t)}</b><span class="muted">${esc(d)}</span></div></div>`).join('');
+
+  // Plan
+  const recs = RECS.filter((r) => r.show(ctx)).map((r) => ({ ...r, p: r.prio(ctx), evText: typeof r.ev === 'function' ? r.ev(ctx) : r.ev })).sort((a, b) => b.p - a.p);
+  $('#plan').innerHTML = recs.map((r, i) => `
+    <article class="rec${i < 2 ? ' top' : ''}">
+      <div class="tags"><span class="pill neutral">${esc(r.kind)}</span><span class="pill ${evClass(r.evText)}">${esc(r.evText)}</span></div>
+      <h3>${esc(r.title)}</h3>
+      <dl>
+        <dt>Was es bringt</dt><dd>${esc(r.what)}</dd>
+        <dt>So geht's</dt><dd>${esc(r.how)}</dd>
+        <dt>Beachten</dt><dd>${esc(r.note)}</dd>
+      </dl>
+    </article>`).join('');
+
+  renderHistory();
+}
+
+/* ---------- Verlauf ---------- */
+function loadHistory() { try { return JSON.parse(localStorage.getItem('haarscan.history') || '[]'); } catch (_) { return []; } }
+function renderHistory() {
+  const h = loadHistory();
+  const t = $('#history');
+  if (!h.length) {
+    t.innerHTML = '<tbody><tr><td class="muted" style="white-space:normal">Noch keine gespeicherten Scans. Nach deinem ersten Scan auf „Scan im Verlauf speichern“ tippen. Die Werte bleiben nur in diesem Browser.</td></tr></tbody>';
+    return;
+  }
+  const rows = h.map((e, i) => {
+    const prev = h[i - 1];
+    const delta = prev && e.recMM != null && prev.recMM != null ? e.recMM - prev.recMM : null;
+    return `<tr><td>${new Date(e.date).toLocaleDateString('de-DE')}</td><td class="num">${fmt(e.foreheadMM)}</td><td class="num">${fmt(e.recMM)}${delta != null ? ` <span class="muted">(${delta > 0 ? '+' : ''}${fmt(delta)})</span>` : ''}</td><td class="num">${fmt(e.crownPct)}</td><td>${esc(e.stage || '–')}</td></tr>`;
+  }).join('');
+  t.innerHTML = `<thead><tr><th>Datum</th><th>Stirn mm</th><th>Ecken mm</th><th>Kopfhaut %</th><th>Stadium</th></tr></thead><tbody>${rows}</tbody>`;
+}
+$('#saveBtn').addEventListener('click', () => {
+  const btn = $('#saveBtn');
+  if (state.example) { btn.textContent = 'Erst scannen, dann speichern'; setTimeout(() => (btn.textContent = 'Scan im Verlauf speichern'), 2200); return; }
+  const ctx = assess();
+  const entry = { date: Date.now(), foreheadMM: ctx.front?.foreheadMM ?? null, recMM: ctx.front ? Math.max(0, ctx.front.recMM) : null, crownPct: ctx.crown?.pct ?? null, stage: ctx.stage?.label ?? null };
+  try {
+    const h = loadHistory(); h.push(entry); localStorage.setItem('haarscan.history', JSON.stringify(h));
+    btn.textContent = 'Gespeichert';
+  } catch (_) { btn.textContent = 'Speichern hier nicht möglich'; }
+  setTimeout(() => (btn.textContent = 'Scan im Verlauf speichern'), 2200);
+  renderHistory();
+});
+
+restoreQuiz();
+render();
+// Modell schon im Hintergrund laden, damit der erste Scan schneller geht
+setTimeout(() => getLandmarker().catch(() => {}), 1200);
+})();
+</script>
+</body>
+</html>
