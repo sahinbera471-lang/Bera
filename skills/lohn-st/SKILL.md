@@ -28,14 +28,23 @@ Steuerberater für die Lohnabrechnung braucht:
 
 ## Ablauf
 
-1. **Datei nehmen.** Die hochgeladene Excel-Datei (.xlsx/.xlsm) verwenden.
-   Kommt nur ein PDF, um die Excel-Datei bitten, denn in einem PDF kann man
-   nichts ausblenden.
+1. **Datei nehmen.** Die hochgeladene Datei verwenden:
+   - **Excel (.xlsx/.xlsm):** Zeilen werden in einer Kopie ausgeblendet (siehe unten).
+   - **Apple Numbers (.numbers):** Zeilen lassen sich darin nicht sicher
+     ausblenden. Die Numbers-Datei bleibt unangetastet. Das Skript schreibt
+     den Steuerberater-Teil mit den angezeigten Werten in eine **neue
+     Excel-Datei** `<Name>_Steuerberater.xlsx`. Dafür wird `numbers-parser`
+     benötigt (`pip install numbers-parser`). Das Einlesen dauert etwa 15 s.
+     Wichtig: Numbers zeigt die Werte für den Mitarbeiter und den
+     Abrechnungsmonat, die beim Speichern ausgewählt waren. Den Nutzer darauf
+     hinweisen.
+   - **PDF:** Darin kann man nichts ausblenden. Um die Excel- oder
+     Numbers-Datei bitten.
 
 2. **Skript ausführen** (benötigt `openpyxl`, ggf. `pip install openpyxl`):
 
    ```bash
-   python3 <skill-ordner>/scripts/lohn_st.py "<datei.xlsx>"
+   python3 <skill-ordner>/scripts/lohn_st.py "<datei.xlsx | datei.numbers>"
    ```
 
    Optionen:

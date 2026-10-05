@@ -129,10 +129,87 @@ def druckbereich_setzen(wb_xml, index, blattname, bereich):
 
 
 # --------------------------------------------------------------------------
+# Apple Numbers (.numbers)
+# --------------------------------------------------------------------------
+
+def numbers_zu_xlsx(eingabe, ausgabe, mit_konten):
+    """Numbers-Datei: Steuerberater-Teil als neue Excel-Datei ausgeben.
+
+    Zeilen in einer .numbers-Datei lassen sich nicht sicher ausblenden. Die
+    Numbers-Datei bleibt daher unangetastet; der untere Teil wird mit den
+    angezeigten Werten in eine neue Excel-Datei übernommen.
+    """
+    import warnings
+    try:
+        from numbers_parser import Document
+    except ImportError:
+        sys.exit("numbers-parser fehlt – bitte 'pip install numbers-parser' ausführen.")
+    from openpyxl.styles import Font
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        doc = Document(eingabe)
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for sheet in doc.sheets:
+        for table in sheet.tables:
+            def text(r, c):
+                zelle = table.cell(r, c)
+                try:
+                    v = zelle.formatted_value
+                except Exception:  # unbekanntes Zahlenformat
+                    v = zelle.value
+                    if isinstance(v, float):
+                        v = f"{v:.2f}"
+                return "" if v in (None, "None") else str(v)
+
+            start = None
+            for r in range(table.num_rows):
+                t = text(r, 0)
+                if MARKER_ABRECHNUNG.search(t) or (mit_konten and MARKER_KONTEN.search(t)):
+                    start = r
+                    break
+            if start is None:
+                continue
+            zeilen = [[text(r, c) for c in range(table.num_cols)] for r in range(start, table.num_rows)]
+            while zeilen and not any(zeilen[-1]):
+                zeilen.pop()
+            spalten = max((max((i for i, v in enumerate(z) if v), default=-1) for z in zeilen), default=-1) + 1
+
+            ws = wb.create_sheet(sheet.name[:31])
+            fett = Font(bold=True)
+            for ri, z in enumerate(zeilen, 1):
+                for ci, v in enumerate(z[:spalten], 1):
+                    if v == "":
+                        continue
+                    roh = table.cell(start + ri - 1, ci - 1).value
+                    if isinstance(roh, (int, float)) and not isinstance(roh, bool):
+                        zelle = ws.cell(ri, ci, roh)
+                        zelle.number_format = '#,##0.00 "€"' if "€" in v else "0.00"
+                    else:
+                        zelle = ws.cell(ri, ci, v)
+                    if ci == 1 and (MARKER_KONTEN.search(v) or MARKER_ABRECHNUNG.search(v)
+                                    or v.strip().lower() in ("weitere angaben", "position")
+                                    or v.lower().startswith("summe")):
+                        zelle.font = fett
+            ws.column_dimensions["A"].width = 42
+            for ci in range(2, spalten + 1):
+                ws.column_dimensions[get_column_letter(ci)].width = 16
+            ws.column_dimensions[get_column_letter(min(spalten, 5) or 1)].width = 40
+            print(f"Blatt '{sheet.name}': übernommen ab Zeile {start + 1} "
+                  f"('{zeilen[0][0]}'), {len(zeilen)} Zeilen")
+    if not wb.worksheets:
+        sys.exit("Kein Blatt mit dem Abschnitt 'Monatsabrechnung für den Steuerberater' gefunden.")
+    wb.save(ausgabe)
+    print(f"Gespeichert: {ausgabe}")
+
+
+# --------------------------------------------------------------------------
 
 def main():
     ap = argparse.ArgumentParser(description="Lohn ST – nur den Steuerberater-Teil der Monatsübersicht anzeigen")
-    ap.add_argument("eingabe", help="Excel-Datei (.xlsx/.xlsm)")
+    ap.add_argument("eingabe", help="Excel-Datei (.xlsx/.xlsm) oder Numbers-Datei (.numbers)")
     ap.add_argument("-o", "--ausgabe", help="Ziel-Datei (Standard: <eingabe>_Steuerberater.xlsx)")
     ap.add_argument("--blatt", action="append",
                     help="nur dieses Tabellenblatt bearbeiten (mehrfach möglich)")
@@ -141,6 +218,11 @@ def main():
     ap.add_argument("--kein-druckbereich", action="store_true",
                     help="Druckbereich nicht ändern")
     args = ap.parse_args()
+
+    if args.eingabe.lower().endswith(".numbers"):
+        ausgabe = args.ausgabe or re.sub(r"\.numbers$", "", args.eingabe, flags=re.I) + "_Steuerberater.xlsx"
+        numbers_zu_xlsx(args.eingabe, ausgabe, not args.ohne_konten)
+        return
 
     endung = ".xlsm" if args.eingabe.lower().endswith(".xlsm") else ".xlsx"
     ausgabe = args.ausgabe or re.sub(r"\.xls[xm]$", "", args.eingabe, flags=re.I) + "_Steuerberater" + endung
