@@ -40,7 +40,11 @@ ZUSCHLAG_KEYWORDS = [
     ("spaet", None), ("heiligabend", None), ("silvester", None),
     ("zuschlag", None), ("%", None),
 ]
-SUMMENZEILE = re.compile(r"\b(summe|gesamt|total|übertrag|uebertrag)\b", re.I)
+SUMMENZEILE = re.compile(r"\b(summe|gesamt|total|übertrag|uebertrag|jahr \d{4})\b", re.I)
+GELD = re.compile(r"€|\b(eur|euro|betrag|lohn|grundlohn)\b|kosten(?! *\(std)|verpflegung", re.I)
+# hübschere Bezeichnungen für typische Spaltenköpfe
+LABELS = [("nacht", "Nachtarbeit"), ("sonntag", "Sonntagsarbeit"), ("feiertag", "Feiertagsarbeit"),
+          ("samstag", "Samstagsarbeit"), ("überstund", "Überstunden"), ("mehrarbeit", "Mehrarbeit")]
 
 
 # --------------------------------------------------------------------------
@@ -48,7 +52,8 @@ SUMMENZEILE = re.compile(r"\b(summe|gesamt|total|übertrag|uebertrag)\b", re.I)
 # --------------------------------------------------------------------------
 
 def norm(text):
-    return re.sub(r"\s+", " ", str(text or "")).strip().lower()
+    text = re.sub(r"(\w)-\s+(\w)", r"\1\2", str(text or ""))  # "Über-\nstunden"
+    return re.sub(r"\s+", " ", text).strip().lower()
 
 
 def to_hours(value, number_format=""):
@@ -196,6 +201,10 @@ def classify_header(text):
     t = norm(text)
     if not t:
         return None
+    if GELD.search(t):
+        return "geld"
+    if t in ("monat", "monate") or t.startswith("monat "):
+        return "monat"
     for kw, _ in ZUSCHLAG_KEYWORDS:
         if kw in t:
             return "zuschlag"
@@ -273,18 +282,27 @@ def detect_rate(header, default=None):
 # Auswertung
 # --------------------------------------------------------------------------
 
+def label_fuer(header):
+    t = norm(header)
+    rate = re.search(r"\d{1,3}\s*%", t)
+    for kw, label in LABELS:
+        if kw in t:
+            return f"{label} {rate.group(0)}" if rate else label
+    return re.sub(r"\s+", " ", str(header)).strip()
+
+
 def summe_spalten(rows, cols):
-    """Spalten-Modus: Zuschlagsspalten über die Tageszeilen aufsummieren."""
+    """Spalten-Modus: Zuschlagsspalten über die Zeilen aufsummieren."""
     result = OrderedDict()
     for col, header in cols:
         default = next((d for kw, d in ZUSCHLAG_KEYWORDS if kw in norm(header)), None)
-        result[str(header).strip()] = {"satz": detect_rate(header, default), "stunden": 0.0}
+        result[label_fuer(header)] = {"satz": detect_rate(header, default), "stunden": 0.0}
     for row in rows:
         for col, header in cols:
             cell = row[col]
             h = to_hours(cell.value, cell.number_format)
             if h:
-                result[str(header).strip()]["stunden"] += h
+                result[label_fuer(header)]["stunden"] += h
     return result
 
 
@@ -349,8 +367,12 @@ def auswerten_blatt(ws, land, immer_berechnen):
         role = classify_header(h) if isinstance(h, str) else None
         if role == "zuschlag":
             zuschlag_cols.append((i, h))
-        elif role and role not in roles:
+        elif role and role != "geld" and role not in roles:
             roles[role] = i
+    # Eine allgemeine Spalte "Zuschläge" ist neben Nacht/Sonntag/... meist ein Euro-Betrag
+    if any(norm(h) not in ("zuschlag", "zuschläge", "zuschlaege") for _, h in zuschlag_cols):
+        zuschlag_cols = [(i, h) for i, h in zuschlag_cols
+                         if norm(h) not in ("zuschlag", "zuschläge", "zuschlaege")]
 
     name, year, month = find_meta(ws, header_row)
 
@@ -359,10 +381,16 @@ def auswerten_blatt(ws, land, immer_berechnen):
     for row in ws.iter_rows(min_row=header_row + 1, max_row=ws.max_row):
         values = [c.value for c in row]
         if all(v in (None, "") for v in values):
+            if rows:
+                break  # Tabellenende
             continue
         if any(isinstance(v, str) and SUMMENZEILE.search(v) for v in values):
             break
-        if "datum" in roles:
+        if "monat" in roles and "datum" not in roles:
+            mv = norm(row[roles["monat"]].value)
+            if mv not in MONATE:
+                continue
+        elif "datum" in roles:
             d = to_date(row[roles["datum"]].value, year, month)
             if not d:
                 continue
@@ -373,10 +401,20 @@ def auswerten_blatt(ws, land, immer_berechnen):
     if not rows:
         return None, "keine Tageszeilen gefunden"
 
-    gesamt = None
-    if "gesamt" in roles:
-        werte = [to_hours(r[roles["gesamt"]].value, r[roles["gesamt"]].number_format) for r in rows]
-        gesamt = sum(w for w in werte if w)
+    # Jahresübersicht mit einer Zeile pro Monat: jeden Monat einzeln auswerten
+    if "monat" in roles and "datum" not in roles and zuschlag_cols:
+        ergebnisse = []
+        for r in rows:
+            mnum = MONATE[norm(r[roles["monat"]].value)]
+            e = ergebnis(ws, name, f"{MONATSNAMEN[mnum]} {year}" if year else MONATSNAMEN[mnum],
+                         "Spalten", summe_spalten([r], zuschlag_cols), gesamt_von([r], roles))
+            if e["zuschlaege"] or e["gesamtstunden"]:
+                ergebnisse.append(e)
+        if not ergebnisse:
+            return None, "alle Monate sind leer (keine Stunden eingetragen)"
+        return ergebnisse, None
+
+    gesamt = gesamt_von(rows, roles)
 
     kann_berechnen = all(k in roles for k in ("datum", "beginn", "ende"))
     if zuschlag_cols and not immer_berechnen:
@@ -406,6 +444,17 @@ def auswerten_blatt(ws, land, immer_berechnen):
                       f"(erkannte Spalten: {', '.join(roles) or '-'})")
 
     monat = f"{MONATSNAMEN[month]} {year}" if month and year else None
+    return [ergebnis(ws, name, monat, modus, result, gesamt)], None
+
+
+def gesamt_von(rows, roles):
+    if "gesamt" not in roles:
+        return None
+    werte = [to_hours(r[roles["gesamt"]].value, r[roles["gesamt"]].number_format) for r in rows]
+    return sum(w for w in werte if w)
+
+
+def ergebnis(ws, name, monat, modus, result, gesamt):
     zeilen = [(k, v["satz"], round(v["stunden"], 2)) for k, v in result.items()
               if round(v["stunden"], 2) != 0]
     return {
@@ -415,7 +464,7 @@ def auswerten_blatt(ws, land, immer_berechnen):
         "modus": modus,
         "gesamtstunden": round(gesamt, 2) if gesamt is not None else None,
         "zuschlaege": [{"art": a, "satz": s, "stunden": h} for a, s, h in zeilen],
-    }, None
+    }
 
 
 # --------------------------------------------------------------------------
@@ -490,7 +539,7 @@ def main():
         if fehler:
             print(f"Blatt '{ws.title}' übersprungen: {fehler}", file=sys.stderr)
             continue
-        ergebnisse.append(e)
+        ergebnisse.extend(e)
 
     if not ergebnisse:
         sys.exit("Keine auswertbare Monatsübersicht gefunden.")

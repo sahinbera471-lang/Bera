@@ -22,7 +22,10 @@ Ergebnis pro Mitarbeiter (pro Tabellenblatt):
 ## Ablauf
 
 1. **Datei finden.** Die hochgeladene Excel-Datei des Nutzers verwenden. Ist
-   keine da, kurz danach fragen.
+   keine da, kurz danach fragen. Kommt nur eine **PDF** (Ausdruck der
+   Excel), um die Original-Excel (.xlsx/.xlsm) bitten – nur dort stehen die
+   Werte zuverlässig drin. Ist die PDF lesbar und ausgefüllt, ersatzweise die
+   Zuschlagsstunden direkt aus der PDF ablesen und im gleichen Format zeigen.
 
 2. **Skript ausführen** (benötigt `openpyxl`, ggf. `pip install openpyxl`):
 
@@ -42,6 +45,11 @@ Ergebnis pro Mitarbeiter (pro Tabellenblatt):
    - **Spalten-Modus:** Hat die Tabelle bereits Spalten wie „Nacht“,
      „Sonntag“, „Feiertag“, „Zuschlag“, „Überstunden“, „Samstag“, „Spät“ …,
      werden diese Spalten über den Monat aufsummiert.
+   - **Jahresübersicht:** Steht pro Zeile ein Monat (Spalte „Monat“, z. B.
+     „AzF Monatsübersicht“ mit „Zuschl. Nacht/Sonntag/Feiertag (Std.)“),
+     kommt pro Monat ein eigener Block heraus; leere Monate entfallen.
+     Euro-Spalten (Grundlohn, Zuschläge €, Gesamt € …) werden ignoriert.
+     Fragt der Nutzer nach einem bestimmten Monat, nur diesen Block zeigen.
    - **Berechnungs-Modus:** Gibt es keine Zuschlagsspalten, aber Datum +
      Beginn + Ende (+ optional Pause), werden die Zuschlagsstunden nach
      § 3b EStG berechnet (Details in `references/zuschlaege.md`).
