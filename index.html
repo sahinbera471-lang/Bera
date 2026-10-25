@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Synthtaste · Vintage synthesizer repair in Bochum</title>
+<meta name="description" content="Repair, restoration and upgrades for vintage analog synthesizers from Moog, Oberheim, Sequential Circuits, Roland and ARP. Workshop in Bochum, Germany, with worldwide service.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Michroma&display=swap">
+<style>
+/* Layout: one calm, left-aligned column (68rem). Sections are separated by space, not boxes.
+   The only ornament is the rear-panel plate in the hero. */
+:root {
+  --bg: #f1f2ef;
+  --surface: #e6e8e3;
+  --card: #f9faf8;
+  --ink: #1b1f1e;
+  --muted: #59615e;
+  --rule: #d2d6d1;
+  --rule-strong: #b9bfba;
+  --accent: #23566f;
+  --accent-hover: #1b4458;
+  --accent-ink: #f4f6f5;
+  --plate: #1f2523;
+  --plate-edge: #0e1211;
+  --plate-line: #39413e;
+  --plate-ink: #d9ded9;
+  --plate-dim: #8d9792;
+  --plate-screw: #5d6662;
+
+  --font-panel: "Michroma", "Eurostile", "Microgramma", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --gutter: max(clamp(16px, 4vw, 40px), env(safe-area-inset-left, 0px));
+  --gutter-r: max(clamp(16px, 4vw, 40px), env(safe-area-inset-right, 0px));
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131615;
+    --surface: #191d1c;
+    --card: #1b201e;
+    --ink: #e3e6e2;
+    --muted: #9aa39f;
+    --rule: #2a302e;
+    --rule-strong: #3a423f;
+    --accent: #86b6cd;
+    --accent-hover: #a2c8da;
+    --accent-ink: #0e1a20;
+    --plate: #222927;
+    --plate-edge: #353d3a;
+    --plate-line: #3d4643;
+    --plate-ink: #d9ded9;
+    --plate-dim: #8d9792;
+    --plate-screw: #4c5551;
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; }
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-underline-offset: 0.2em; }
+a:hover { color: var(--accent-hover); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+.wrap {
+  max-width: 68rem;
+  margin-inline: auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter-r);
+}
+
+/* Header */
+.site-header .wrap {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem 2.25rem;
+  padding-block: 1.4rem;
+}
+.brand {
+  font-family: var(--font-panel);
+  font-size: 0.9rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+.nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.75rem; }
+.nav a, .lang a { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+.nav a:hover, .lang a:hover { color: var(--ink); }
+.lang { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); display: flex; gap: 0.5rem; }
+.lang a { font-size: inherit; }
+.lang [aria-current] { color: var(--ink); }
+@media (max-width: 640px) {
+  .site-header .wrap { grid-template-columns: 1fr auto; }
+  .nav { grid-column: 1 / -1; order: 3; gap: 0.25rem 1.25rem; }
+}
+
+/* Hero */
+.hero .wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: center;
+  padding-block: 4rem 5.5rem;
+}
+.hero h1 {
+  font-weight: 500;
+  font-size: clamp(2rem, 1.2rem + 3vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  margin: 0 0 1.25rem;
+  max-width: 18ch;
+  text-wrap: balance;
+}
+.lead { color: var(--muted); font-size: 1.125rem; max-width: 34rem; margin: 0 0 2rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  font: 500 1rem/1 var(--font-body);
+  padding: 0.9rem 1.3rem;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: var(--accent-hover); color: var(--accent-ink); }
+.btn-quiet { background: transparent; border-color: var(--rule-strong); color: var(--ink); }
+.btn-quiet:hover { border-color: var(--ink); color: var(--ink); }
+@media (max-width: 860px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; padding-block: 2rem 3.5rem; }
+}
+
+/* Rear-panel plate */
+.plate {
+  position: relative;
+  background: var(--plate);
+  color: var(--plate-ink);
+  border: 1px solid var(--plate-edge);
+  border-radius: 4px;
+  padding: 2.25rem 2rem 1.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+.plate-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid var(--plate-line);
+  font-family: var(--font-panel);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.plate-head span:last-child { color: var(--plate-dim); }
+.plate dl { margin: 0; }
+.plate dl div {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 0.6rem;
+  border-bottom: 1px dashed var(--plate-line);
+}
+.plate dl div:last-child { border-bottom: 0; }
+.plate dt { color: var(--plate-dim); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; padding-top: 0.15em; }
+.plate dd { margin: 0; }
+.screw {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--plate-screw);
+  box-shadow: inset 0 0 0 1px var(--plate-edge);
+}
+.screw::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  top: 4px;
+  height: 1px;
+  background: var(--plate-edge);
+  transform: rotate(var(--turn, 30deg));
+}
+.s1 { top: 10px; left: 10px; }
+.s2 { top: 10px; right: 10px; --turn: -20deg; }
+.s3 { bottom: 10px; left: 10px; --turn: 75deg; }
+.s4 { bottom: 10px; right: 10px; --turn: 10deg; }
+@media (max-width: 420px) {
+  .plate { padding: 2rem 1.25rem 1.5rem; }
+  .plate dl div { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; }
+}
+
+/* Sections */
+.section { padding-block: 5rem; }
+.band { background: var(--surface); }
+.section-head { display: grid; gap: 0.6rem; max-width: 40rem; margin-bottom: 2.5rem; }
+.section h2 {
+  font-weight: 500;
+  font-size: clamp(1.6rem, 1.25rem + 1.3vw, 2.1rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+.section-head p { margin: 0; color: var(--muted); }
+.label {
+  font-family: var(--font-panel);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+@media (max-width: 640px) { .section { padding-block: 3.5rem; } }
+
+/* Services */
+.services { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.services li {
+  display: grid;
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr) minmax(0, 17.5rem);
+  gap: 0.4rem 2rem;
+  align-items: baseline;
+  padding-block: 1.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+.services h3 { margin: 0; font-size: 1.125rem; font-weight: 600; }
+.services p { margin: 0; color: var(--muted); max-width: 36rem; }
+.spec { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); text-align: right; }
+@media (max-width: 860px) {
+  .services li { grid-template-columns: minmax(0, 1fr); }
+  .spec { text-align: left; }
+}
+
+/* Instruments */
+.brands {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2.5rem 2rem;
+}
+.brands h3 { margin: 0 0 0.9rem; }
+.brands ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; font-family: var(--font-mono); font-size: 0.9rem; }
+.footnote { margin: 2.75rem 0 0; color: var(--muted); }
+@media (max-width: 960px) { .brands { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .brands { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 1.25rem; } }
+
+/* Shop */
+.table-scroll { overflow-x: auto; }
+.shop { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.shop th {
+  text-align: left;
+  font: 400 0.68rem/1.4 var(--font-panel);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 1.5rem 0.9rem 0;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.shop td { padding: 1.05rem 1.5rem 1.05rem 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.shop td:nth-child(2) { color: var(--muted); }
+.shop th:last-child, .shop td:last-child { text-align: right; padding-right: 0; white-space: nowrap; }
+.shop td:last-child { font-family: var(--font-mono); font-size: 0.95rem; }
+.ask { color: var(--muted); }
+.after-table { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.75rem; }
+.after-table p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+@media (max-width: 640px) {
+  .shop thead { display: none; }
+  .shop, .shop tbody, .shop tr, .shop td { display: block; }
+  .shop tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 1rem; padding-block: 1rem; border-bottom: 1px solid var(--rule); }
+  .shop tbody tr:first-child { border-top: 1px solid var(--rule-strong); }
+  .shop td { padding: 0; border: 0; }
+  .shop td:first-child { grid-column: 1; grid-row: 1; font-weight: 500; }
+  .shop td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; font-size: 0.95rem; }
+  .shop td:last-child { grid-column: 2; grid-row: 1; }
+}
+
+/* Steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem 3rem; }
+.steps li { display: grid; gap: 0.5rem; align-content: start; }
+.step-no { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); }
+.steps h3 { margin: 0; font-size: 1.125rem; font-weight: 600; }
+.steps p { margin: 0; color: var(--muted); }
+@media (max-width: 760px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* Contact */
+.contact-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 3.5rem; align-items: start; }
+@media (max-width: 860px) { .contact-grid { grid-template-columns: minmax(0, 1fr); gap: 3rem; } }
+
+.tag { background: var(--card); border: 1px solid var(--rule-strong); border-radius: 4px; padding: 1.75rem; }
+.tag-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.tag-head::after {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  background: var(--bg);
+}
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1rem; }
+.full { grid-column: 1 / -1; }
+.field { display: grid; gap: 0.4rem; }
+.field label { font-size: 0.9rem; font-weight: 500; }
+.field .hint { font-weight: 400; color: var(--muted); }
+input, textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 0.7rem 0.8rem;
+}
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; }
+input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+textarea { min-height: 7rem; resize: vertical; }
+.form-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
+.form-foot p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+@media (max-width: 560px) {
+  .tag { padding: 1.25rem; }
+  .form-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.output { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed var(--rule-strong); display: grid; gap: 1rem; }
+.output p { margin: 0; }
+.output pre {
+  margin: 0;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+
+.contact-list { margin: 0; display: grid; gap: 1.5rem; }
+.contact-list div { display: grid; gap: 0.3rem; }
+.contact-list dt { font-family: var(--font-panel); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.contact-list dd { margin: 0; font-size: 1.05rem; }
+.contact-list .mono { font-family: var(--font-mono); font-size: 0.98rem; }
+.copy-mini {
+  margin-left: 0.5rem;
+  font: 500 0.75rem/1 var(--font-body);
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  vertical-align: 0.1em;
+}
+.copy-mini:hover { color: var(--ink); border-color: var(--ink); }
+
+/* Footer */
+.site-footer { border-top: 1px solid var(--rule); }
+.site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  padding-block: 2rem 2.5rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.site-footer p { margin: 0; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+.site-footer a { color: var(--muted); text-decoration: none; }
+.site-footer a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top">Synthtaste</a>
+    <nav class="nav" aria-label="Main">
+      <a href="#service">Service</a>
+      <a href="#instruments">Instruments</a>
+      <a href="#shop">Shop</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="lang">
+      <a href="#top" aria-current="true">EN</a>
+      <span aria-hidden="true">/</span>
+      <a href="https://synthtaste.de/" lang="de">DE</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Vintage synthesizers, repaired and upgraded in Bochum.</h1>
+        <p class="lead">Repairs, new power supplies, Fatar keybeds and MIDI upgrades for analog classics from Moog, Oberheim, Sequential Circuits, Roland and ARP. Instruments reach us from all over the world.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#contact">Send a repair request</a>
+          <a class="btn btn-quiet" href="#shop">Parts &amp; power supplies</a>
+        </div>
+      </div>
+
+      <aside class="plate" aria-label="Workshop facts">
+        <span class="screw s1" aria-hidden="true"></span>
+        <span class="screw s2" aria-hidden="true"></span>
+        <span class="screw s3" aria-hidden="true"></span>
+        <span class="screw s4" aria-hidden="true"></span>
+        <div class="plate-head"><span>Synthtaste</span><span>Made in Germany</span></div>
+        <dl>
+          <div><dt>Workshop</dt><dd>Bochum, Germany</dd></div>
+          <div><dt>Experience</dt><dd>27+ years</dd></div>
+          <div><dt>Service</dt><dd>Worldwide</dd></div>
+          <div><dt>Built here</dt><dd>Own boards and PSUs</dd></div>
+          <div><dt>PSU input</dt><dd>88–264 V AC, 50/60 Hz</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="service">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What we do</h2>
+        <p>Most instruments come to us with a dead voice, a tired power supply or keys that stopped feeling right. This is what we can do about it.</p>
+      </div>
+      <ul class="services">
+        <li>
+          <h3>Repair and restoration</h3>
+          <p>Fault finding, repairs, calibration and complete refurbishing for instruments that have a few decades behind them.</p>
+          <span class="spec">Full service, in-house</span>
+        </li>
+        <li>
+          <h3>Power supplies</h3>
+          <p>Our own replacement PSUs, engineered and built in Germany. Adjustable voltages, extra fuses and safety diodes, and much less heat inside the case.</p>
+          <span class="spec">Universal AC, 88–264 V</span>
+        </li>
+        <li>
+          <h3>Keybeds</h3>
+          <p>New Fatar TP/9 keybeds as plug-and-play kits. Aftertouch on request.</p>
+          <span class="spec">Memorymoog · Prophet VS · Matrix 12</span>
+        </li>
+        <li>
+          <h3>MIDI and memory</h3>
+          <p>MIDI boards for synths that never had MIDI, and memory expansions with up to 1,600 presets for the Prophet series.</p>
+          <span class="spec">Minimoog · 4 Voice · Prophets</span>
+        </li>
+        <li>
+          <h3>Mods</h3>
+          <p>Filter and audio mods, poly mod for the Matrix 12, pot upgrades, new displays and an SD emulator for the DPX-1.</p>
+          <span class="spec">OB-8 · Matrix 12 · DPX-1</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section band" id="instruments">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Instruments we service</h2>
+        <p>A selection of the models we work on.</p>
+      </div>
+      <div class="brands">
+        <div>
+          <h3 class="label">Moog</h3>
+          <ul>
+            <li>Memorymoog</li>
+            <li>Minimoog Model D</li>
+            <li>Polymoog</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="label">Sequential</h3>
+          <ul>
+            <li>Prophet-5</li>
+            <li>Prophet-600</li>
+            <li>Prophet VS</li>
+            <li>Prophet 2000 / 2002</li>
+            <li>Pro-One</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="label">Oberheim</h3>
+          <ul>
+            <li>OB-X</li>
+            <li>OB-Xa</li>
+            <li>OB-8</li>
+            <li>Xpander</li>
+            <li>Matrix 12</li>
+            <li>4 Voice</li>
+            <li>DPX-1</li>
+            <li>M1000</li>
+            <li>M6 / 6R</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="label">Roland</h3>
+          <ul>
+            <li>Jupiter-8</li>
+            <li>Juno-60</li>
+            <li>TR-808</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="label">Also</h3>
+          <ul>
+            <li>ARP</li>
+            <li>Elka Synthex</li>
+            <li>Yamaha CS-60</li>
+            <li>Yamaha CS-80</li>
+          </ul>
+        </div>
+      </div>
+      <p class="footnote">Your instrument isn't listed? <a href="#contact">Ask anyway.</a></p>
+    </div>
+  </section>
+
+  <section class="section" id="shop">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>From the shop</h2>
+        <p>Parts we build ourselves. Prices are plus shipping.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="shop">
+          <thead>
+            <tr><th scope="col">Item</th><th scope="col">Fits</th><th scope="col">Price</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Power supply, universal AC</td><td>Oberheim Matrix 12 (US version)</td><td>€549</td></tr>
+            <tr><td>Power supply, universal AC</td><td>Oberheim Xpander</td><td>€479</td></tr>
+            <tr><td>Power supply, keyboard version</td><td>Sequential Prophet VS</td><td class="ask">on request</td></tr>
+            <tr><td>Power supply, universal AC</td><td>Yamaha CS-60 / CS-80</td><td class="ask">on request</td></tr>
+            <tr><td>Power supply</td><td>Roland Jupiter-8</td><td class="ask">on request</td></tr>
+            <tr><td>Fatar keybed kit, plug and play</td><td>Memorymoog, Prophet VS, Matrix 12</td><td class="ask">on request</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="after-table">
+        <p>Stock changes often. The shop always has the current list.</p>
+        <a class="btn btn-quiet" href="https://www.synthtaste.com/en/shop">Open the shop</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section band" id="process">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How a repair works</h2>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="step-no">Step 1</span>
+          <h3>Describe the problem</h3>
+          <p>Model and exact version, what's wrong, and any earlier service. Photos help.</p>
+        </li>
+        <li>
+          <span class="step-no">Step 2</span>
+          <h3>Get an assessment</h3>
+          <p>We reply with what we think the instrument needs and how to get it to us.</p>
+        </li>
+        <li>
+          <span class="step-no">Step 3</span>
+          <h3>Repair and return</h3>
+          <p>We do the work, test it and send it back to you.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Send a repair request</h2>
+        <p>Fill this in and we'll put the email together for you.</p>
+      </div>
+      <div class="contact-grid">
+        <form class="tag" id="request" novalidate>
+          <div class="tag-head"><span class="label">Repair request</span></div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-name">Name</label>
+              <input id="f-name" name="name" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required>
+            </div>
+            <div class="field full">
+              <label for="f-instrument">Instrument <span class="hint">model and exact version</span></label>
+              <input id="f-instrument" name="instrument" placeholder="e.g. Prophet-5 Rev 3.3" required>
+            </div>
+            <div class="field full">
+              <label for="f-fault">What's wrong?</label>
+              <textarea id="f-fault" name="fault" placeholder="e.g. Voice 4 is silent, filter on voice 2 doesn't close fully" required></textarea>
+            </div>
+            <div class="field full">
+              <label for="f-history">Previous service <span class="hint">optional</span></label>
+              <input id="f-history" name="history" placeholder="e.g. Recapped in 2019">
+            </div>
+          </div>
+          <div class="form-foot">
+            <p>Photos help. Attach them to the email.</p>
+            <button class="btn btn-primary" type="submit">Write the email</button>
+          </div>
+
+          <div class="output" id="output" hidden>
+            <p>Your message is ready. Send it to <strong>post@synthtaste.com</strong>.</p>
+            <pre id="message"></pre>
+            <div class="actions">
+              <a class="btn btn-primary" id="mailto" href="mailto:post@synthtaste.com">Open in mail app</a>
+              <button class="btn btn-quiet" type="button" id="copy-message">Copy text</button>
+            </div>
+          </div>
+        </form>
+
+        <dl class="contact-list">
+          <div>
+            <dt>Email</dt>
+            <dd><a class="mono" id="email-address" href="mailto:post@synthtaste.com">post@synthtaste.com</a><button class="copy-mini" type="button" id="copy-email">Copy</button></dd>
+          </div>
+          <div>
+            <dt>Phone</dt>
+            <dd><a class="mono" href="tel:+4915161516467">+49 (0)1516 15 16 467</a></dd>
+          </div>
+          <div>
+            <dt>Workshop</dt>
+            <dd>Synthtaste<br>Eppendorfer Straße 22<br>44869 Bochum, Germany</dd>
+          </div>
+          <div>
+            <dt>Instagram</dt>
+            <dd><a href="https://www.instagram.com/synthtaste/">@synthtaste</a></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>© 2026 Synthtaste · Dipl.-Ing. Martin Höwner · Eppendorfer Straße 22, 44869 Bochum</p>
+    <nav aria-label="Legal">
+      <!-- Point these at the real imprint and privacy pages. -->
+      <a href="#">Imprint</a>
+      <a href="#">Privacy</a>
+      <a href="https://www.instagram.com/synthtaste/">Instagram</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var EMAIL = 'post@synthtaste.com';
+  var form = document.getElementById('request');
+  var output = document.getElementById('output');
+  var message = document.getElementById('message');
+  var mailto = document.getElementById('mailto');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function value(name) { return form.elements[name].value.trim(); }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+
+    var instrument = value('instrument');
+    var text = [
+      'Hello Synthtaste,',
+      '',
+      'Instrument: ' + instrument,
+      'Fault: ' + value('fault'),
+      'Previous service: ' + (value('history') || 'none / unknown'),
+      '',
+      'Name: ' + value('name'),
+      'Email: ' + value('email')
+    ].join('\n');
+
+    message.textContent = text;
+    mailto.href = 'mailto:' + EMAIL +
+      '?subject=' + encodeURIComponent('Repair request: ' + instrument) +
+      '&body=' + encodeURIComponent(text);
+    output.hidden = false;
+    output.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  });
+
+  function selectContents(node) {
+    var range = document.createRange();
+    range.selectNodeContents(node);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  function copy(text, button, fallbackNode) {
+    var original = button.textContent;
+    function done(label) {
+      button.textContent = label;
+      setTimeout(function () { button.textContent = original; }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { done('Copied'); },
+        function () { selectContents(fallbackNode); done('Selected'); }
+      );
+    } else {
+      selectContents(fallbackNode);
+      done('Selected');
+    }
+  }
+
+  document.getElementById('copy-message').addEventListener('click', function () {
+    copy(message.textContent, this, message);
+  });
+  document.getElementById('copy-email').addEventListener('click', function () {
+    copy(EMAIL, this, document.getElementById('email-address'));
+  });
+})();
+</script>
+</body>
+</html>
