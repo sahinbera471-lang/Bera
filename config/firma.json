@@ -1,0 +1,23 @@
+{
+  "_hinweis": "Felder mit [ ... ] sind Platzhalter. Solange einer davon leer/Platzhalter ist, werden Rechnungen als ENTWURF gestempelt.",
+  "name": "RRB Ruhrrail Bahndienstleistungen GmbH",
+  "strasse": "Daimlerstraße 6",
+  "plz_ort": "45891 Gelsenkirchen",
+  "eigene_kuerzel": [
+    "RRB",
+    "Ruhrrail"
+  ],
+  "telefon": "[Telefon]",
+  "email": "[E-Mail Buchhaltung]",
+  "steuernummer": "[Steuernummer]",
+  "ust_id": "[USt-IdNr.]",
+  "handelsregister": "[Amtsgericht / HRB]",
+  "geschaeftsfuehrer": "[Geschäftsführer]",
+  "bank": "[Bank]",
+  "iban": "[IBAN]",
+  "bic": "[BIC]",
+  "logo": "logo.png",
+  "bundesland": "NW",
+  "rechnungsnummer_format": "RE-{jahr}-{nr:04d}",
+  "naechste_rechnungsnummer": 1
+}

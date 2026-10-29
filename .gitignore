@@ -1,0 +1,7 @@
+# enthalten Personen- und Kundendaten
+eingang/
+ausgang/
+
+__pycache__/
+*.pyc
+.pytest_cache/

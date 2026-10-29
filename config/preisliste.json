@@ -1,0 +1,30 @@
+{
+  "_quelle": "Preisliste_RRB_Ruhrrail_neu.pdf (Nettopreise, zzgl. MwSt.)",
+  "mwst_satz": 19,
+  "zahlungsziel_tage": 10,
+  "mindeststunden_pro_schicht": 8,
+  "nachtfenster": {"von": "20:00", "bis": "06:00"},
+  "rollen": {
+    "TF": {
+      "bezeichnung": "Triebfahrzeugführer / Lotse",
+      "normal":   {"bis_100km": 82.00,  "ab_100km": 93.00},
+      "nacht":    {"bis_100km": 87.50,  "ab_100km": 98.50},
+      "sonntag":  {"bis_100km": 97.50,  "ab_100km": 108.50},
+      "feiertag": {"bis_100km": 110.00, "ab_100km": 120.00}
+    },
+    "AZF": {
+      "bezeichnung": "Arbeitszugführer / ZBV",
+      "normal":   {"bis_100km": 67.00, "ab_100km": 78.00},
+      "nacht":    {"bis_100km": 70.50, "ab_100km": 81.50},
+      "sonntag":  {"bis_100km": 77.00, "ab_100km": 88.00},
+      "feiertag": {"bis_100km": 85.00, "ab_100km": 95.00}
+    }
+  },
+  "anfahrt": [
+    {"ab_km": 100, "bis_km": 200, "preis": 100.00},
+    {"ab_km": 200, "bis_km": 300, "preis": 150.00},
+    {"ab_km": 300, "bis_km": 400, "preis": 200.00},
+    {"ab_km": 400, "bis_km": null, "preis": 300.00}
+  ],
+  "stornierung": "Storno innerhalb 24 h vor Beginn: Ausfallpauschale 8 Stunden"
+}
