@@ -1,0 +1,35 @@
+{
+  "_hinweis": "aliase = Schreibweisen, unter denen der Kunde in Bautagesberichten (Baufirma) oder Bestellungen auftaucht. entfernung_km = Strecke ab RRB zum Einsatzort (für Satz 'ab 100 km' und Anfahrt).",
+  "hubert": {
+    "name": "Joseph Hubert Bauunternehmung GmbH & Co. KG",
+    "strasse": "Bleichstraße 15",
+    "plz_ort": "90429 Nürnberg",
+    "rechnung_email": "rechnung@jhubert.de",
+    "zahlungsziel_tage": 14,
+    "aliase": [
+      "JOSEPH HUBERT",
+      "J. HUBERT",
+      "J.HUBERT",
+      "J.H",
+      "Hubert"
+    ]
+  },
+  "eiffage": {
+    "name": "Eiffage Infra-Rail GmbH",
+    "strasse": "[Straße Eiffage]",
+    "plz_ort": "[PLZ Ort Eiffage]",
+    "rechnung_email": "[Rechnungs-E-Mail Eiffage]",
+    "zahlungsziel_tage": null,
+    "aliase": [
+      "Eiffage Infra Rail",
+      "Eiffage Infra-Rail",
+      "Eiffage"
+    ]
+  },
+  "_einsatzorte_km": {
+    "Plettenberg": 75,
+    "Castrop Rauxel": 20,
+    "Castrop-Rauxel": 20
+  },
+  "_einsatzorte_km_hinweis": "Straßen-km ab Gelsenkirchen, grob geschätzt – bitte mit echten Werten ersetzen. Ab 100 km greifen die höheren Sätze + Anfahrt."
+}
