@@ -1,0 +1,22 @@
+# GTA 6 – Das musst du wissen (Kurzvideo)
+
+Hochkant-Video (1080×1920, 30 fps, ca. 93 s) für TikTok / Reels / Shorts.
+
+- `GTA6_Das_musst_du_wissen.mp4` – fertiges Video
+- `voiceover/s01.mp3 … s10.mp3` – Sprecheraufnahmen (ElevenLabs, Stimme „Timon“)
+- `make_video.py` – rendert Grafiken, Untertitel, Musik und Mix neu: `python3 make_video.py`
+  (braucht Python 3 mit Pillow + NumPy, ffmpeg und die Schrift Inter)
+
+## Inhalt
+1. GTA 6 erscheint in 6 Tagen
+2. Release: Donnerstag, 19.11.2026 (zweimal verschoben)
+3. Plattformen: PS5 und Xbox Series X|S, PC noch nicht angekündigt
+4. Preis: Standard 79,99 €, Ultimate 99,99 €
+5. Story: Leonida / Vice City, Lucia und Jason
+6. Tipp: Speicher frei machen, Pre-Load checken
+7. Achtung: Krankfeiern kann zur fristlosen Kündigung führen (§ 626 BGB)
+8. Schon die Ankündigung „dann bin ich halt krank“ kann reichen, Clips in der Story können als Beweis dienen
+9. Besser: Urlaub beantragen, mit dem Chef reden, nach Feierabend zocken
+10. Outro mit Call-to-Action
+
+Stand der Infos: 13.11.2026. Inoffizielles Fan-Video, keine Rechtsberatung.
