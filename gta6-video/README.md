@@ -44,3 +44,20 @@ ein eigener „GTA 6“-Schriftzug als Platzhalter.
 (19.11.2026) als kostenlosen Download auf rockstargames.com bereit. Lege sie als `assets/map.png`
 (oder `.jpg`) ab und starte `python3 make_video2.py` neu: Die Karte ersetzt dann in den Map-Szenen
 die eigene Karte, mit langsamem Zoom, und die sechs Regionen erscheinen als Chips darunter.
+
+---
+
+# Serie: 5 weitere Kurzvideos (`serie/`)
+
+Je ca. 1 Minute, hochkant, mit Sprecherstimme und Untertiteln. Rendern mit `python3 make_series.py all`
+(oder einzeln: `aktie`, `gta5`, `geschichte`, `rekorde`, `vicecity`).
+
+| Ordner | Video | Thema |
+|---|---|---|
+| `serie/aktie/` | `GTA6_TakeTwo_Aktie.mp4` | Take-Two-Aktie & GTA 6 (Kursrutsch bei Verschiebungen, +8 % nach Quartalszahlen, Vorbestellungen, Prognose, Risiken – keine Anlageberatung) |
+| `serie/gta5/` | `GTA5_Die_Legende.mp4` | GTA 5 bleibt die Legende: 815 Mio. $ in 24 h, 1 Mrd. $ in 3 Tagen, ~235 Mio. verkauft, 3 Konsolen-Generationen, GTA Online |
+| `serie/geschichte/` | `GTA_Geschichte_1997-2026.mp4` | Von GTA (1997) bis GTA 6 (2026) mit Zeitstrahl |
+| `serie/rekorde/` | `GTA6_Rekorde.mp4` | Trailer-Rekorde (90,4 Mio. / 475 Mio.), 3 Guinness-Rekorde, Vorbestellungen, Vergleich mit GTA 5 |
+| `serie/vicecity/` | `Vice_City_2002_vs_2026.mp4` | Vice City damals vs. heute: Zeit, Helden, Map, Technik |
+
+Stand der Infos: 14.11.2026. Inoffizielle Fan-Videos.
