@@ -32,6 +32,10 @@ VO_DIR = os.path.join(HERE, "voiceover2")
 LOGO = os.path.join(HERE, "assets", "logo.png")
 OUT = os.path.join(HERE, "GTA6_Map_Story_Figuren.mp4")
 
+MAP_FILES = [os.path.join(HERE, "assets", n) for n in ("map.png", "map.jpg", "map.jpeg", "map.webp")]
+RM_X, RM_Y, RM_W, RM_H, RM_ZOOM = 40, 285, 1000, 700, 1.12
+_REAL = {}  # wird in init_worker gefüllt, wenn assets/map.* vorliegt
+
 LEAD, TAIL, END_HOLD = 0.2, 0.35, 0.8
 mv.LEAD = LEAD  # build_audio platziert die Stimme mit diesem Vorlauf
 VIOLET = (165, 125, 255)
@@ -155,6 +159,74 @@ def build_map():
     paste(out, arrow, nx - 20, ny)
     paste_c(out, text_img("N", font("xb", 30), MUTED), nx, ny + 62)
     return out
+
+
+def real_map_path():
+    return next((f for f in MAP_FILES if os.path.exists(f)), None)
+
+
+def load_real_map(path):
+    """Echte Karte (vom Nutzer bereitgestellt) einpassen; etwas größer laden als Reserve für den Zoom."""
+    im = Image.open(path).convert("RGBA")
+    k = min(RM_W / im.width, RM_H / im.height)
+    fw, fh = int(im.width * k), int(im.height * k)
+    big = im.resize((int(fw * RM_ZOOM), int(fh * RM_ZOOM)), Image.LANCZOS)
+    mask = np.array(rrect(fw, fh, 28, (255, 255, 255, 255)).getchannel("A"))
+    border = rrect(fw, fh, 28, (0, 0, 0, 0), outline=c4(CYAN), width=4)
+    shadow = panel(fw, fh, None, fill=(0, 0, 0, 0))
+    x, y = RM_X + (RM_W - fw) // 2, RM_Y + (RM_H - fh) // 2
+    return dict(big=big, fw=fw, fh=fh, mask=mask, border=border, shadow=shadow, x=x, y=y)
+
+
+def real_map_fn(scene_start, reveal=False):
+    """Zeichnet die echte Karte mit langsamem Zoom über alle Map-Szenen hinweg."""
+    R = _REAL
+
+    def fn(frame, st):
+        t0, t1 = R["span"]
+        p = min(1.0, max(0.0, (scene_start + st - t0) / (t1 - t0)))
+        z = 1 + (RM_ZOOM - 1) * p
+        big, fw, fh = R["big"], R["fw"], R["fh"]
+        cw, ch = big.width / z, big.height / z
+        cx, cy = big.width / 2, big.height / 2
+        view = big.crop((int(cx - cw / 2), int(cy - ch / 2), int(cx + cw / 2), int(cy + ch / 2)))
+        view = view.resize((fw, fh), Image.BILINEAR)
+        view.putalpha(Image.fromarray(np.minimum(np.array(view.getchannel("A")), R["mask"])))
+        view.alpha_composite(R["border"])
+        yr = fh
+        if reveal:
+            yr = int(fh * ease_out(min(1.0, max(0.0, (st - 0.1) / 1.3))))
+            if yr <= 0:
+                return
+        paste(frame, R["shadow"].crop((0, 0, R["shadow"].width, yr + 2 * SH)), R["x"] - SH, R["y"] - SH)
+        paste(frame, view.crop((0, 0, fw, yr)) if yr < fh else view, R["x"], R["y"])
+        if yr < fh:
+            ImageDraw.Draw(frame).line([(R["x"] - 20, R["y"] + yr), (R["x"] + fw + 20, R["y"] + yr)],
+                                       fill=c4(CYAN), width=4)
+    return fn
+
+
+def region_chips(s, c, show, animate):
+    """Regionen als Chips unter der echten Karte (2 Spalten × 3 Zeilen)."""
+    for i, (name, desc, col, lon, lat, word) in enumerate(REGIONS):
+        cx, top = RM_X + 245 + (i % 2) * 510, 1003 + (i // 2) * 80
+        t = kw(c, word) if i in animate else -5
+        if i not in show or i in animate:
+            g = panel(490, 70, None, fill=(16, 18, 40, 200))
+            paste(g, marker(i + 1, (90, 92, 120), 22), SH + 16, SH + 13)
+            paste(g, text_img(name, font("b", 36), (110, 114, 150)), SH + 72, SH + 16)
+            it = s.add_panel(with_alpha(g, 0.7), cx, top, -5, "fade")
+            it["until"] = t if i in show else 1e9
+        if i not in show:
+            continue
+        p = panel(490, 70, col)
+        paste(p, marker(i + 1, col, 22), SH + 16, SH + 13)
+        paste(p, text_img(name, font("b", 36)), SH + 72, SH + 16)
+        s.add_panel(p, cx, top, t, "left" if i % 2 == 0 else "right")
+
+
+def real_map_credit(s, t):
+    s.add(text_img("Leonida-Karte © Rockstar Games", font("m", 25), MUTED), W / 2, 1250, t, "fade")
 
 
 def marker(num, col, r=27):
@@ -286,6 +358,19 @@ def scene_hook(s, c):
 
 def scene_map_intro(s, c, mp):
     s.bg_mode = "dim"
+    if _REAL:
+        s.pre.append(real_map_fn(c["start"], reveal=True))
+        p = panel(490, 230, PINK)
+        paste_c(p, grad_text("LEONIDA", fit("LEONIDA", "black", 100, 440), (255, 205, 95), PINK), SH + 245, SH + 34)
+        paste_c(p, text_img("inspiriert von Florida", font("b", 36)), SH + 245, SH + 160)
+        s.add_panel(p, RM_X + 245, 1003, kw(c, "leonida"), "left")
+        p = panel(490, 230, ORANGE)
+        paste_c(p, text_img("MAP-GRÖSSE", font("sb", 30), MUTED), SH + 245, SH + 26)
+        paste_c(p, text_img("≈ 2× GTA 5", font("black", 76), ORANGE), SH + 245, SH + 76)
+        paste_c(p, text_img("laut Preview-Berichten", font("m", 28), MUTED), SH + 245, SH + 176)
+        s.add_panel(p, RM_X + 755, 1003, kw(c, "doppelt"), "right")
+        real_map_credit(s, 1.2)
+        return
     it = {"x": MX0 - PADM, "y": MY0 - PADM}
 
     def reveal(frame, st):
@@ -335,6 +420,11 @@ def regions_panel_items(s, c, show, animate, t_panel):
 
 def scene_regions_a(s, c, mp):
     s.bg_mode = "dim"
+    if _REAL:
+        s.pre.append(real_map_fn(c["start"]))
+        region_chips(s, c, show={0, 1, 2}, animate={0, 1, 2})
+        real_map_credit(s, -5)
+        return
     s.add(mp, MX0 - PADM + mp.width / 2, MY0 - PADM, -5, glow=False)
     regions_panel_items(s, c, show={0, 1, 2}, animate={0, 1, 2}, t_panel=0.0)
     s.add(text_img("Schematische Karte · keine offizielle Map", font("m", 26), MUTED), W / 2, 1238, -5, "fade")
@@ -342,6 +432,11 @@ def scene_regions_a(s, c, mp):
 
 def scene_regions_b(s, c, mp):
     s.bg_mode = "dim"
+    if _REAL:
+        s.pre.append(real_map_fn(c["start"]))
+        region_chips(s, c, show=set(range(6)), animate={3, 4, 5})
+        real_map_credit(s, -5)
+        return
     s.add(mp, MX0 - PADM + mp.width / 2, MY0 - PADM, -5, glow=False)
     regions_panel_items(s, c, show=set(range(6)), animate={3, 4, 5}, t_panel=-5)
     s.add(text_img("Schematische Karte · keine offizielle Map", font("m", 26), MUTED), W / 2, 1238, -5, "fade")
@@ -433,9 +528,11 @@ def scene_outro(s, c):
     s.add(text_img("Welche Region feierst du am meisten?", fit("Welche Region feierst du am meisten?", "xb", 52, 960)),
           W / 2, bottom + 370, kw(c, "region"))
     s.add(text_img("Schreib's in die Kommentare!", font("sb", 42), MUTED), W / 2, bottom + 440, kw(c, "region") + 0.4)
-    s.add(text_img("Inoffizielles Fan-Video · Karte schematisch, keine offizielle Map", font("m", 25), MUTED),
-          W / 2, 1190, 0.6, "fade")
-    s.add(text_img("GTA VI © Rockstar Games · Stand: 14.11.2026", font("m", 25), MUTED), W / 2, 1226, 0.6, "fade")
+    note = ("Inoffizielles Fan-Video · GTA VI & Leonida-Karte © Rockstar Games" if _REAL
+            else "Inoffizielles Fan-Video · Karte schematisch, keine offizielle Map")
+    s.add(text_img(note, fit(note, "m", 25, 980), MUTED), W / 2, 1190, 0.6, "fade")
+    note2 = "Stand: 14.11.2026" if _REAL else "GTA VI © Rockstar Games · Stand: 14.11.2026"
+    s.add(text_img(note2, font("m", 25), MUTED), W / 2, 1226, 0.6, "fade")
 
 
 SCENES = [scene_hook, scene_map_intro, scene_regions_a, scene_regions_b, scene_story_sting, scene_premise,
@@ -470,6 +567,11 @@ def init_worker():
     dim = bg.copy()
     dim.alpha_composite(Image.new("RGBA", (W, H), (5, 5, 16, 150)))
     mp = build_map()
+    _REAL.clear()
+    rp = real_map_path()
+    if rp:
+        _REAL.update(load_real_map(rp))
+        _REAL["span"] = (clips[1]["start"], clips[3]["start"] + clips[3]["sdur"])
     scenes = []
     for i, fn in enumerate(SCENES):
         tag = TAGS[i]
@@ -543,7 +645,8 @@ def main():
     clips, total = _S["clips"], _S["total"]
     assert total <= 90.0, f"Video zu lang: {total:.2f}s"
     nframes = int(math.ceil(total * FPS))
-    print(f"Dauer {total:.2f}s, {nframes} Frames, Logo-Datei: {'ja' if os.path.exists(LOGO) else 'nein (Platzhalter)'}")
+    print(f"Dauer {total:.2f}s, {nframes} Frames, Logo-Datei: {'ja' if os.path.exists(LOGO) else 'nein (Platzhalter)'}, "
+          f"echte Karte: {real_map_path() or 'nein (schematische Karte)'}")
     tmp = tempfile.mkdtemp(prefix="gta6b_")
     wav = os.path.join(tmp, "mix.wav")
     mv.build_audio(clips, total, wav, booms=(0, 4, 9))

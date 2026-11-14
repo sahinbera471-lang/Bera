@@ -39,3 +39,8 @@ es vor dem Release nicht), die Story mit Lucia und Jason, weitere Figuren und da
 Lege das offizielle Logo als `assets/logo.png` ab (am besten mit transparentem Hintergrund) und
 starte `python3 make_video2.py` neu, dann wird es dort automatisch eingesetzt. Ohne Datei erscheint
 ein eigener „GTA 6“-Schriftzug als Platzhalter.
+
+**Echte Karte:** Rockstar stellt die offizielle Leonida-Karte laut eigener Ankündigung am Release-Tag
+(19.11.2026) als kostenlosen Download auf rockstargames.com bereit. Lege sie als `assets/map.png`
+(oder `.jpg`) ab und starte `python3 make_video2.py` neu: Die Karte ersetzt dann in den Map-Szenen
+die schematische Karte, mit langsamem Zoom, und die sechs Regionen erscheinen als Chips darunter.
