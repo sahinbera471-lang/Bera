@@ -870,6 +870,219 @@ VIDEOS["faktencheck"] = dict(
     ])
 
 
+# ---------------------------------------------------------------- Video: Die krassesten Gerüchte
+def picto2(name, size=150, color=WHITE):
+    """Weitere eigene Piktogramme."""
+    def fn(d, k):
+        S = size * k
+        lw = max(2, int(S * .07))
+        C = c4(color)
+        if name == "flame":
+            d.polygon([(S * .5, S * .02), (S * .78, S * .38), (S * .86, S * .66), (S * .7, S * .9), (S * .5, S * .98),
+                       (S * .3, S * .9), (S * .14, S * .66), (S * .24, S * .42), (S * .36, S * .52)], fill=c4(ORANGE))
+            d.polygon([(S * .5, S * .4), (S * .66, S * .64), (S * .62, S * .86), (S * .5, S * .92), (S * .38, S * .86),
+                       (S * .34, S * .68)], fill=c4(YELLOW))
+        elif name == "skull":
+            d.ellipse((S * .14, S * .06, S * .86, S * .7), fill=C)
+            d.rounded_rectangle((S * .3, S * .56, S * .7, S * .9), int(S * .06), fill=C)
+            for cx in (S * .36, S * .64):
+                d.ellipse((cx - S * .1, S * .3, cx + S * .1, S * .5), fill=c4(DARK))
+            d.polygon([(S * .5, S * .52), (S * .45, S * .62), (S * .55, S * .62)], fill=c4(DARK))
+        elif name == "shield":
+            d.polygon([(S * .5, S * .04), (S * .9, S * .18), (S * .84, S * .62), (S * .5, S * .96), (S * .16, S * .62),
+                       (S * .1, S * .18)], fill=C)
+            d.line([(S * .3, S * .5), (S * .45, S * .64), (S * .7, S * .36)], fill=c4(DARK), width=lw, joint="curve")
+        elif name == "bank":
+            d.polygon([(S * .5, S * .06), (S * .94, S * .3), (S * .06, S * .3)], fill=C)
+            for x in (S * .18, S * .38, S * .58, S * .78):
+                d.rectangle((x - S * .05, S * .36, x + S * .05, S * .78), fill=C)
+            d.rectangle((S * .06, S * .82, S * .94, S * .94), fill=C)
+        elif name == "wallet":
+            d.rounded_rectangle((S * .06, S * .22, S * .94, S * .86), int(S * .1), fill=C)
+            d.rounded_rectangle((S * .56, S * .42, S * .98, S * .66), int(S * .06), fill=c4(DARK))
+            d.ellipse((S * .66, S * .5, S * .74, S * .58), fill=C)
+        elif name == "bolt":
+            d.polygon([(S * .58, S * .02), (S * .18, S * .56), (S * .46, S * .56), (S * .38, S * .98), (S * .82, S * .4),
+                       (S * .54, S * .4)], fill=c4(YELLOW))
+        elif name == "ring":
+            d.rectangle((S * .08, S * .58, S * .92, S * .86), fill=C)
+            for y in (S * .2, S * .32, S * .44):
+                d.line([(S * .12, y), (S * .88, y)], fill=c4(PINK), width=lw // 2 + 1)
+            for x in (S * .1, S * .9):
+                d.line([(x, S * .12), (x, S * .6)], fill=C, width=lw)
+        elif name == "disco":
+            d.line([(S * .5, 0), (S * .5, S * .16)], fill=C, width=lw // 2 + 1)
+            d.ellipse((S * .14, S * .16, S * .86, S * .88), fill=c4(VIOLET))
+            for i in range(1, 4):
+                y = S * (.16 + .18 * i)
+                d.line([(S * .16, y), (S * .84, y)], fill=c4(WHITE, 160), width=2)
+            for i in range(1, 4):
+                x = S * (.14 + .18 * i)
+                d.line([(x, S * .18), (x, S * .86)], fill=c4(WHITE, 160), width=2)
+        elif name == "tv":
+            d.rounded_rectangle((S * .06, S * .28, S * .94, S * .86), int(S * .08), fill=C)
+            d.rounded_rectangle((S * .14, S * .36, S * .86, S * .78), int(S * .05), fill=c4(CYAN))
+            d.line([(S * .5, S * .28), (S * .3, S * .06)], fill=C, width=lw // 2 + 1)
+            d.line([(S * .5, S * .28), (S * .7, S * .06)], fill=C, width=lw // 2 + 1)
+        elif name == "bed":
+            d.rectangle((S * .06, S * .5, S * .94, S * .72), fill=C)
+            d.rounded_rectangle((S * .1, S * .36, S * .36, S * .52), int(S * .05), fill=C)
+            d.rectangle((S * .06, S * .3, S * .12, S * .9), fill=C)
+            d.rectangle((S * .88, S * .5, S * .94, S * .9), fill=C)
+    return ss_shape((size, size), fn)
+
+
+def rumor_tile(pic_img, label, kind, w=230, h=230):
+    col = VERDICT[kind][0]
+    p = panel(w, h, col)
+    paste_c(p, pic_img, SH + w / 2, SH + 22)
+    paste_c(p, text_img(label, fit(label, "b", 34, w - 24)), SH + w / 2, SH + 140)
+    sub = "gezeigt" if kind == "ok" else "unbestätigt"
+    paste_c(p, text_img(sub, font("m", 24), col), SH + w / 2, SH + 188)
+    paste(p, vicon(kind, 46), SH + w - 56, SH + 10)
+    return p
+
+
+def rumor_tag(s, n):
+    s.add(pill(f"GERÜCHT #{n}", ORANGE, DARK, size=34, padx=28, pady=12), W / 2, 150, 0.0, "down", glow=False)
+
+
+def q0(s, c):
+    s.add(picto2("flame", 170), W / 2, 260, 0.0, "pop", glow=False)
+    s.add(pill("VIRAL AUF TIKTOK", ORANGE, DARK, size=36, padx=30, pady=14), W / 2, 450, kw(c, "viral"), "pop")
+    add_title(s, "DIE 7 KRASSESTEN", 560, 0.2, size=120, c1=YELLOW, c2=ORANGE)
+    add_text(s, "GTA-6-GERÜCHTE", 700, 0.35, size=100, weight="black")
+    add_text(s, "…und was wirklich dran ist", 840, kw(c, "dran"), size=48, weight="b", color=MUTED)
+    for i in range(7):
+        im = ss_shape((80, 80), lambda d, k, i=i: d.ellipse((0, 0, 80 * k - 1, 80 * k - 1), fill=c4(ORANGE)))
+        paste_c(im, text_img(str(i + 1), font("black", 44), DARK), 40, 12)
+        s.add(im, 140 + i * 133, 960, kw(c, "krassesten") + 0.08 * i, "pop", glow=False)
+
+
+def q1(s, c):
+    rumor_tag(s, 1)
+    add_title(s, "MAP DURCHQUEREN", 290, 0.0, size=100, c1=WARM, c2=PINK)
+    m = small_map(0.6)
+    m = m.resize((int(m.width * 0.78), int(m.height * 0.78)), Image.LANCZOS)
+    s.add(m, W / 2, 400, 0.1, "fade", glow=False)
+    for i, (name, txt, word) in enumerate([("walk", "~178 Min.", "fuß"), ("car", "~35 Min.", "auto"),
+                                           ("plane", "~7 Min.", "flugzeug")]):
+        p = panel(320, 170, ORANGE)
+        paste_c(p, picto(name, 64), SH + 160, SH + 14)
+        paste_c(p, text_img(txt, font("black", 54)), SH + 160, SH + 96)
+        s.add_panel(p, 190 + i * 350, 930, kw(c, word), "up")
+    s.add(stamp("no", "UNBESTÄTIGT", size=46), W / 2, 1140, kw(c, "offiziell"), "pop", glow=False)
+
+
+def q2(s, c):
+    rumor_tag(s, 2)
+    add_title(s, "KRIMINELLES PROFIL", 290, 0.0, size=100, c1=ORANGE, c2=RED)
+    steps = [("PROFESSIONELL", GREEN, "shield", 150), ("AGGRESSIV", YELLOW, None, 210), ("GEWALTTÄTIG", ORANGE, "skull", 270),
+             ("PSYCHO", RED, "skull", 330)]
+    t0, t1 = kw(c, "stufen"), kw(c, "psycho")
+    base = 900
+    for i, (name, col, ic, hgt) in enumerate(steps):
+        t = t0 + (t1 - t0) * i / 3
+        x = 70 + i * 240
+        bar = rrect(220, hgt, 22, c4(col))
+        paste_c(bar, text_img(str(i + 1), font("black", 90), DARK), 110, 30)
+        s.add(bar, x + 110, base - hgt, t, "up", glow=False)
+        icon = picto2(ic, 90, col) if ic else bang_icon(col, 90)
+        s.add(icon, x + 110, base - hgt - 106, t + 0.15, "pop", glow=False)
+        s.add(text_img(name, fit(name, "xb", 30, 226), col), x + 110, base + 14, t + 0.1, "fade")
+    s.add_panel(mk_card([("4 Stufen: unbestätigt", "xb", 42, RED),
+                         ("Bestätigt: Polizei braucht Zeugen & merkt sich dein Outfit", "b", 32, GREEN)],
+                        accent=YELLOW, icon=vicon("mid", 84), align="left"), W / 2, 1000, kw(c, "bestätigt"))
+
+
+def q3(s, c):
+    rumor_tag(s, 3)
+    bub = picto("bubble", 240, WHITE)
+    paste_c(bub, text_img("!", font("black", 130), DARK), 120, 14)
+    s.add(bub, W / 2, 270, 0.0, "pop", glow=False)
+    add_text(s, "Passanten erinnern sich an dich", 570, 0.2, size=62, weight="black", maxw=990)
+    s.add_panel(mk_card([("…und reagieren auf frühere Begegnungen", "b", 44, WHITE)], accent=ORANGE), W / 2, 700,
+                kw(c, "begegnungen"))
+    s.add(stamp("no", "NUR EINE TRAILER-SZENE", size=46), W / 2, 900, kw(c, "trailer"), "pop", glow=False)
+
+
+def q4(s, c):
+    rumor_tag(s, 4)
+    s.add(picto("bag", 180, YELLOW), W / 2, 270, 0.0, "pop", glow=False)
+    add_text(s, "JEDEN LADEN AUSRAUBEN?", 480, kw(c, "jeden"), size=80, weight="black", color=YELLOW, maxw=990)
+    s.add_panel(claim_card("Läden ausrauben & Beute beim Hehler", "mid", "WIRD BERICHTET"), W / 2, 640, kw(c, "hehler"),
+                "left")
+    s.add_panel(claim_card("Wirklich jeder einzelne Laden?", "no", "OFFEN"), W / 2, 850, kw(c, "offen"), "left")
+
+
+def q5(s, c):
+    rumor_tag(s, 5)
+    add_title(s, "NEUES GELDSYSTEM?", 290, 0.0, size=110, c1=GREEN, c2=YELLOW)
+    rows = [("bank", "BANKGELD", "sicher", VIOLET, "bankgeld"), ("wallet", "BARGELD", "kannst du verlieren", GREEN, "bargeld"),
+            ("bag", "BEUTEGELD", "muss erst gewaschen werden", RED, "beutegeld")]
+    for i, (ic, name, desc, col, word) in enumerate(rows):
+        icon = picto2(ic, 100, col) if ic != "bag" else picto("bag", 100, col)
+        p = mk_card([(name, "black", 56, col), (desc, "b", 38, WHITE)], accent=col, icon=icon, align="left")
+        s.add_panel(p, W / 2, 440 + i * 190, kw(c, word), "left")
+    s.add(stamp("no", "UNBESTÄTIGT", size=50), W / 2, 1020, kw(c, "unbestätigt"), "pop", glow=False)
+
+
+def q6(s, c):
+    rumor_tag(s, 6)
+    s.add(picto("pump", 200, WHITE), W / 2 - 130, 270, 0.0, "pop", glow=False)
+    s.add(picto2("bolt", 200), W / 2 + 130, 270, 0.2, "pop", glow=False)
+    add_title(s, "TANKEN WIRD WICHTIG", 510, 0.1, size=96, c1=WARM, c2=PINK)
+    s.add_panel(mk_card([("Verbrenner tanken · E-Autos laden", "b", 44, WHITE)], accent=ORANGE), W / 2, 650,
+                kw(c, "verbrenner"))
+    add_title(s, "~10 SEK.", 800, kw(c, "10"), size=130, c1=YELLOW, c2=ORANGE)
+    s.add(stamp("no", "NUR 1 FAN-SEITE", size=48), W / 2, 980, kw(c, "fan-seite"), "pop", glow=False)
+
+
+def q7(s, c):
+    rumor_tag(s, 7)
+    add_title(s, "16+ AKTIVITÄTEN?", 290, 0.0, size=110, c1=GREEN, c2=CYAN)
+    tiles = [(picto2("ring", 100), "Wrestling", "mid", "wrestling"), (picto2("disco", 100), "Nachtclubs", "mid", "wrestling"),
+             (picto2("tv", 100), "TV", "mid", "wrestling"), (picto2("bed", 100), "Schlafen", "mid", "wrestling"),
+             (picto("fish", 100), "Angeln", "ok", "angeln"), (picto("waves", 100), "Jetski", "ok", "jetski"),
+             (picto("golf", 100), "Minigolf", "ok", "minigolf"), (picto("dumbbell", 100), "Fitness", "ok", "fitnessstudio")]
+    for i, (pic, label, kind, word) in enumerate(tiles):
+        t = kw(c, word) + (0.15 * i if i < 4 else 0)
+        s.add_panel(rumor_tile(pic, label, kind), 165 + (i % 4) * 250, 440 + (i // 4) * 290, t, "pop")
+    s.add(stamp("mid", "TEILWEISE WAHR", size=50), W / 2, 1040, kw(c, "teilweise"), "pop", glow=False)
+
+
+def q8(s, c):
+    add_text(s, "Welches Gerücht soll stimmen?", 300, kw(c, "gerücht"), size=64, weight="black", maxw=990)
+    names = ["Riesen-Map", "Krimi-Profil", "NPC-Gedächtnis", "Jeder Laden", "Geldsystem", "Tanken", "16+ Aktivitäten"]
+    for i, n in enumerate(names):
+        p = pill(f"{i + 1}  {n}", ORANGE if i % 2 == 0 else YELLOW, DARK, size=34, padx=26, pady=14)
+        s.add(p, 290 + (i % 2) * 500, 420 + (i // 2) * 95, kw(c, "gerücht") + 0.1 * i, "pop", glow=False)
+    add_text(s, "Schreib's in die Kommentare!", 820, kw(c, "kommentare"), size=48, weight="sb", color=MUTED)
+    s.add(pill("FOLG MIR FÜR MEHR", PINK, DARK, size=44, padx=40, pady=22), W / 2, 920, kw(c, "folg"), "pop")
+    disclaimer(s, "Gerüchte = unbestätigt · Stand: 14.11.2026", "Inoffizielles Fan-Video · alle Grafiken selbst erstellt")
+
+
+VIDEOS["geruechte"] = dict(
+    out="GTA6_Die_krassesten_Geruechte.mp4", header="GTA 6 · DIE KRASSESTEN GERÜCHTE", booms=(0,),
+    scenes=[q0, q1, q2, q3, q4, q5, q6, q7, q8],
+    tags=[None] * 9,
+    highlight={"gta-6-gerüchte", "viral", "krassesten", "gerücht", "1", "2", "3", "4", "5", "6", "7", "map", "35",
+               "psycho", "bestätigt", "zeugen", "outfit", "trailer", "laden", "hehler", "bankgeld", "bargeld",
+               "beutegeld", "unbestätigt", "10", "fan-seite", "16", "wrestling", "fallschirmspringen", "angeln",
+               "jetski", "minigolf", "fitnessstudio", "19"},
+    captions=[
+        "Diese GTA-6-Gerüchte gehen gerade auf TikTok viral! Ich zeig dir die krassesten – und was wirklich dran ist.",
+        "Gerücht Nummer 1: Die Map ist so riesig, dass du zu Fuß fast 3 Stunden brauchst. Mit dem Auto etwa 35 Minuten, mit dem Flugzeug 7. Offiziell bestätigt ist davon aber nichts.",
+        "Gerücht Nummer 2: Dein Verhalten bestimmt dein kriminelles Profil – in 4 Stufen, von professionell bis Psycho. Bestätigt ist nur: Die Polizei braucht Zeugen und merkt sich dein Outfit.",
+        "Gerücht Nummer 3: Passanten sollen sich an dich erinnern und auf frühere Begegnungen reagieren. Das basiert aber nur auf einer Szene aus dem Trailer.",
+        "Gerücht Nummer 4: Du kannst jeden einzelnen Laden ausrauben. Läden ausrauben und Beute beim Hehler verkaufen wird tatsächlich berichtet – ob wirklich jeder Laden geht, ist offen.",
+        "Gerücht Nummer 5: ein neues Geldsystem. Bankgeld ist sicher, Bargeld kannst du verlieren, und Beutegeld musst du erst waschen. Klingt stark – ist aber unbestätigt.",
+        "Gerücht Nummer 6: Tanken wird endlich wichtig. Verbrenner müssen tanken, E-Autos laden, ein Tankstopp dauert etwa 10 Sekunden. Quelle: nur eine Fan-Seite.",
+        "Gerücht Nummer 7: über 16 Aktivitäten – vom Wrestling bis zum Fallschirmspringen. Teilweise stimmt's: Angeln, Jetski, Minigolf und Fitnessstudio hat Rockstar gezeigt.",
+        "Welches Gerücht soll unbedingt stimmen? Schreib's in die Kommentare – am 19. November wissen wir es. Folg mir, damit du nichts verpasst!",
+    ])
+
+
 # ---------------------------------------------------------------- Rendering
 _S = {}
 

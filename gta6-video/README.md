@@ -50,7 +50,7 @@ die eigene Karte, mit langsamem Zoom, und die sechs Regionen erscheinen als Chip
 # Serie: 5 weitere Kurzvideos (`serie/`)
 
 Je ca. 1 Minute, hochkant, mit Sprecherstimme und Untertiteln. Rendern mit `python3 make_series.py all`
-(oder einzeln: `aktie`, `gta5`, `geschichte`, `rekorde`, `vicecity`, `faktencheck`).
+(oder einzeln: `aktie`, `gta5`, `geschichte`, `rekorde`, `vicecity`, `faktencheck`, `geruechte`).
 
 | Ordner | Video | Thema |
 |---|---|---|
@@ -60,5 +60,6 @@ Je ca. 1 Minute, hochkant, mit Sprecherstimme und Untertiteln. Rendern mit `pyth
 | `serie/rekorde/` | `GTA6_Rekorde.mp4` | Trailer-Rekorde (90,4 Mio. / 475 Mio.), 3 Guinness-Rekorde, Vorbestellungen, Vergleich mit GTA 5 |
 | `serie/vicecity/` | `Vice_City_2002_vs_2026.mp4` | Vice City damals vs. heute: Zeit, Helden, Map, Technik |
 | `serie/faktencheck/` | `GTA6_Faktencheck.mp4` | Faktencheck zu kursierenden TikTok-„Fakten“ (Map-Zeiten, Map-Größe, Aktivitäten, Polizei, NPCs, Geld, Tanken) mit Siegeln bestätigt / berichtet / Gerücht |
+| `serie/geruechte/` | `GTA6_Die_krassesten_Geruechte.mp4` | Die 7 krassesten GTA-6-Gerüchte (Map-Zeiten, Krimi-Profil, NPC-Gedächtnis, Läden ausrauben, Geldsystem, Tanken, 16+ Aktivitäten) mit „Was ist dran?“ |
 
 Stand der Infos: 14.11.2026. Inoffizielle Fan-Videos.
