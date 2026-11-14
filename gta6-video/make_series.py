@@ -1083,6 +1083,168 @@ VIDEOS["geruechte"] = dict(
     ])
 
 
+# ---------------------------------------------------------------- Video: GTA 6 Online & PC
+def picto3(name, size=150, color=WHITE):
+    def fn(d, k):
+        S = size * k
+        lw = max(2, int(S * .07))
+        C = c4(color)
+        if name == "pad":
+            d.rounded_rectangle((S * .06, S * .3, S * .94, S * .74), int(S * .2), fill=C)
+            d.rectangle((S * .2, S * .47, S * .36, S * .53), fill=c4(DARK))
+            d.rectangle((S * .25, S * .42, S * .31, S * .58), fill=c4(DARK))
+            for cx, cy in ((S * .68, S * .44), (S * .78, S * .54)):
+                d.ellipse((cx - S * .05, cy - S * .05, cx + S * .05, cy + S * .05), fill=c4(DARK))
+        elif name == "monitor":
+            d.rounded_rectangle((S * .04, S * .1, S * .96, S * .7), int(S * .05), fill=C)
+            d.rectangle((S * .1, S * .16, S * .9, S * .64), fill=c4(DARK))
+            d.polygon([(S * .42, S * .7), (S * .58, S * .7), (S * .64, S * .86), (S * .36, S * .86)], fill=C)
+            d.rounded_rectangle((S * .26, S * .86, S * .74, S * .93), int(S * .03), fill=C)
+        elif name == "globe":
+            d.ellipse((S * .06, S * .06, S * .94, S * .94), outline=C, width=lw)
+            d.ellipse((S * .3, S * .06, S * .7, S * .94), outline=C, width=lw // 2 + 1)
+            d.line([(S * .06, S * .5), (S * .94, S * .5)], fill=C, width=lw // 2 + 1)
+            d.arc((S * .12, S * .1, S * .88, S * .5), 200, 340, fill=C, width=lw // 2 + 1)
+            d.arc((S * .12, S * .5, S * .88, S * .9), 20, 160, fill=C, width=lw // 2 + 1)
+        elif name == "group":
+            for cx, s_ in ((S * .25, .8), (S * .75, .8), (S * .5, 1.0)):
+                r = S * .12 * s_
+                d.ellipse((cx - r, S * .3 - r, cx + r, S * .3 + r), fill=C)
+                d.pieslice((cx - r * 2, S * .5, cx + r * 2, S * .5 + r * 4), 180, 360, fill=C)
+    return ss_shape((size, size), fn)
+
+
+def hbars(s, title, rows, y0, vmax, wmax=450, x0=360, unit_fmt=None):
+    """rows: [(label, value|None, value_text, color, t)]"""
+    add_text(s, title, y0, rows[0][4] - 0.2, size=40, weight="sb", color=MUTED, anim="fade")
+    for i, (label, val, vtxt, col, t) in enumerate(rows):
+        y = y0 + 90 + i * 140
+        s.add(text_img(label, fit(label, "xb", 46, 290)), 60, y + 8, t, "left", center=False)
+        if val is None:
+            ghost = rrect(wmax, 70, 35, c4((90, 92, 130), 120), outline=c4(MUTED, 200), width=3)
+            s.add(ghost, x0, y, t, "fade", center=False, glow=False)
+            s.add(text_img("???", font("black", 52), YELLOW), x0 + wmax / 2 - 50, y + 4, t + 0.3, "pop", center=False)
+        else:
+            frac = max(0.02, val / vmax)
+            s.dyn.append(bar_fn(x0, y, wmax, 70, frac, col, t))
+            s.add(text_img(vtxt, font("black", 40), col), x0 + max(70, int(wmax * frac)) + 16, y + 10, t + 0.9,
+                  "fade", center=False)
+
+
+def o1(s, c):
+    s.add(picto3("pad", 190), W / 2 - 150, 270, 0.0, "pop", glow=False)
+    s.add(picto3("monitor", 190), W / 2 + 150, 270, 0.15, "pop", glow=False)
+    add_title(s, "ONLINE & PC", 500, 0.2, size=160, c1=CYAN, c2=PINK)
+    add_text(s, "Wann kommt was?", 690, kw(c, "beides"), size=64, weight="black")
+    s.add(pill("19.11.2026 · nur PS5 & Xbox", CYAN, DARK, size=38, padx=30, pady=16), W / 2, 820, kw(c, "konsole"), "pop")
+    s.add(stamp("no", "OHNE ONLINE-MODUS", size=40), W / 2, 940, kw(c, "online-modus"), "pop", glow=False)
+
+
+def o2(s, c):
+    s.add(picto3("globe", 180), W / 2, 310, 0.0, "pop", glow=False)
+    add_title(s, "GTA 6 ONLINE", 520, 0.15, size=140, c1=CYAN, c2=GREEN)
+    s.add(stamp("no", "NICHT ANGEKÜNDIGT", size=50), W / 2, 700, kw(c, "angekündigt"), "pop", glow=False)
+    s.add_panel(claim_card("Zum Release: nur Singleplayer", "ok", "LAUT ROCKSTAR"), W / 2, 880,
+                kw(c, "singleplayer-erlebnis"), "up")
+
+
+def o3(s, c):
+    add_title(s, "SO WAR'S BEI GTA 5", 300, 0.0, size=110, c1=GOLD, c2=ORANGE)
+    t1, t2 = kw(c, "september"), kw(c, "wochen")
+    x0, x1, y = 190, 890, 640
+    s.add(rrect(x1 - x0, 16, 8, c4((80, 82, 120))), x0, y - 8, t1, "fade", center=False, glow=False)
+    s.dyn.append(bar_fn(x0, y - 8, x1 - x0, 16, 1.0, GOLD, t1 + 0.3, dur=max(0.6, t2 - t1)))
+    for x, date, name, t, col in ((x0, "17.09.2013", "GTA 5", t1, GOLD), (x1, "01.10.2013", "GTA Online", t2, CYAN)):
+        dot = ss_shape((60, 60), lambda d, k, col=col: d.ellipse((0, 0, 60 * k - 1, 60 * k - 1), fill=c4(col)))
+        s.add(dot, x, y - 30, t, "pop", glow=False)
+        s.add(text_img(date, font("xb", 40), col), x, y + 50, t, "up")
+        s.add(text_img(name, font("black", 52)), x, y - 130, t, "down")
+    add_title(s, "NUR 14 TAGE", 780, t2 + 0.2, size=120, c1=CYAN, c2=GREEN)
+
+
+def o4(s, c):
+    add_title(s, "ONLINE NACH RELEASE", 300, 0.0, size=96, c1=CYAN, c2=PINK)
+    hbars(s, "Tage bis zum Online-Modus", [
+        ("GTA IV", 0.6, "zum Start", GREEN, kw(c, "multiplayer")),
+        ("GTA V", 14, "14 Tage", GOLD, 0.3),
+        ("RDR 2", 32, "~1 Monat", ORANGE, kw(c, "red dead")),
+        ("GTA VI", None, "", PINK, kw(c, "multiplayer") + 0.8)], 430, vmax=32)
+
+
+def o5(s, c):
+    add_text(s, "GTA 6 ONLINE", 320, 0.0, size=56, weight="sb", color=MUTED, anim="fade")
+    add_title(s, "2027?", 400, kw(c, "2027"), size=300, c1=CYAN, c2=PINK)
+    s.add_panel(mk_card([("laut Berichten (u. a. Bloomberg)", "b", 44, WHITE)], accent=YELLOW), W / 2, 760,
+                kw(c, "berichten"))
+    s.add(stamp("mid", "NICHT BESTÄTIGT", size=50), W / 2, 950, kw(c, "bestätigt"), "pop", glow=False)
+
+
+def o6(s, c):
+    s.add(picto3("group", 180), W / 2, 310, 0.0, "pop", glow=False)
+    add_title(s, "ROLEPLAY?", 510, kw(c, "aussehen"), size=150, c1=VIOLET, c2=PINK)
+    s.add_panel(claim_card("2023: Rockstar übernimmt das FiveM-Team", "ok", "FAKT"), W / 2, 700, kw(c, "fivem"), "left")
+    s.add_panel(claim_card("Roleplay in GTA 6 Online", "mid", "SPEKULATION"), W / 2, 890, kw(c, "spekulation"), "left")
+
+
+def o7(s, c):
+    add_title(s, "DAS ALTE GTA ONLINE", 300, 0.0, size=100, c1=GREEN, c2=CYAN)
+    for i, (txt, word) in enumerate([("läuft weiter", "läuft"), ("bekommt weiter Updates", "updates"),
+                                     ("kein Ende angekündigt", "ende")]):
+        s.add_panel(claim_card(txt, "ok"), W / 2, 470 + i * 170, kw(c, word), "left")
+
+
+def o8(s, c):
+    s.add(picto3("monitor", 130), W / 2, 305, 0.0, "pop", glow=False)
+    add_title(s, "PC-SPIELER, AUFGEPASST!", 460, kw(c, "pc-spielern"), size=90, c1=CYAN, c2=VIOLET)
+    hbars(s, "Monate bis zur PC-Version", [
+        ("GTA IV", 7, "7 Monate", GREEN, kw(c, "gta 4")),
+        ("RDR 2", 12, "1 Jahr", ORANGE, kw(c, "red dead")),
+        ("GTA V", 19, "19 Monate", RED, kw(c, "19"))], 590, vmax=19)
+
+
+def o9(s, c):
+    mon = picto3("monitor", 220)
+    paste_c(mon, text_img("?", font("black", 110), YELLOW), 110, 30)
+    s.add(mon, W / 2, 305, 0.0, "pop", glow=False)
+    add_title(s, "GTA 6 AUF PC?", 545, 0.15, size=130, c1=CYAN, c2=PINK)
+    s.add(stamp("no", "NICHT ANGEKÜNDIGT", size=48), W / 2, 715, kw(c, "angekündigt"), "pop", glow=False)
+    s.add_panel(claim_card("Bericht: Anfang 2027", "mid", "VON ROCKSTAR UNBESTÄTIGT"), W / 2, 895, kw(c, "2027"),
+                "left")
+
+
+def o10(s, c):
+    add_title(s, "MEIN FAZIT", 300, kw(c, "fazit"), size=130, c1=CYAN, c2=PINK)
+    s.add_panel(claim_card("Online: wohl 2027", "mid", "PROGNOSE"), W / 2, 470, kw(c, "online"), "left")
+    s.add_panel(claim_card("PC: nach der Konsolen-Version", "mid", "PROGNOSE"), W / 2, 640, kw(c, "release"), "left")
+    add_text(s, "Wann rechnest du damit?", 830, kw(c, "rechnest"), size=58, weight="black")
+    add_text(s, "Schreib's in die Kommentare!", 915, kw(c, "kommentare"), size=44, weight="sb", color=MUTED)
+    s.add(pill("FOLG MIR FÜR UPDATES", PINK, DARK, size=44, padx=40, pady=22), W / 2, 1010, kw(c, "folg"), "pop")
+    disclaimer(s, "Stand: 14.11.2026 · Quellen: Rockstar, Take-Two, Bloomberg, GamesBeat",
+               "Inoffizielles Fan-Video · Prognosen ohne Gewähr")
+
+
+VIDEOS["online"] = dict(
+    out="GTA6_Online_und_PC.mp4", header="GTA 6 · ONLINE & PC", booms=(0, 7),
+    scenes=[o1, o2, o3, o4, o5, o6, o7, o8, o9, o10],
+    tags=[None, ("#1 STATUS ONLINE", CYAN), ("#2 RÜCKBLICK", GOLD), ("#3 VERGLEICH", PINK), ("#4 PROGNOSE", YELLOW),
+          ("#5 ROLEPLAY", VIOLET), ("#6 GTA ONLINE", GREEN), ("#7 PC-HISTORIE", CYAN), ("#8 PC-STATUS", RED), None],
+    highlight={"gta", "6", "5", "4", "online-modus", "online", "19", "konsole", "pc-version", "singleplayer-erlebnis",
+               "2013", "2", "wochen", "1", "monat", "multiplayer", "2027", "fivem", "roleplay", "spekulation",
+               "updates", "pc-spielern", "7", "monaten", "jahr", "fazit"},
+    captions=[
+        "GTA 6 kommt am 19. November – aber nur für Konsole und ohne Online-Modus. Wann kommt beides? Wir schauen in die Geschichte!",
+        "Ein Online-Modus ist offiziell noch nicht angekündigt. Rockstar beschreibt GTA 6 zum Release als Singleplayer-Erlebnis.",
+        "Ein Blick zurück: GTA 5 erschien im September 2013 – und GTA Online kam nur 2 Wochen später.",
+        "Bei Red Dead Redemption 2 dauerte es rund 1 Monat bis zur Online-Beta. GTA 4 hatte den Multiplayer sogar direkt zum Start.",
+        "Bei GTA 6 wird es wohl länger dauern: Berichten zufolge wird der Online-Modus erst 2027 erwartet. Bestätigt ist das aber nicht.",
+        "Und wie könnte GTA 6 Online aussehen? Rockstar hat 2023 das Team hinter FiveM übernommen – viele hoffen deshalb auf Roleplay. Das ist aber noch Spekulation.",
+        "Das alte GTA Online läuft übrigens weiter und bekommt weiter Updates. Ein Ende ist nicht angekündigt.",
+        "Jetzt zu euch PC-Spielern! Die PC-Version kam bei Rockstar immer später: GTA 4 nach 7 Monaten, Red Dead 2 nach 1 Jahr, GTA 5 sogar erst nach 19 Monaten.",
+        "Für GTA 6 ist noch keine PC-Version angekündigt. Ein Bericht spricht von Anfang 2027 – Rockstar hat das aber nicht bestätigt.",
+        "Mein Fazit: Online und PC kommen sehr wahrscheinlich – nur nicht zum Release. Wann rechnest du damit? Schreib's in die Kommentare und folg mir für Updates!",
+    ])
+
+
 # ---------------------------------------------------------------- Rendering
 _S = {}
 
