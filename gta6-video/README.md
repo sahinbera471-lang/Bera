@@ -32,8 +32,8 @@ Hochkant-Video (1080×1920, 30 fps, ca. 1:23 Min.).
 - `make_video2.py` – rendert das Video neu: `python3 make_video2.py`
 
 Inhalt: Leonida und die Map-Größe (laut Preview-Berichten etwa doppelt so groß wie GTA 5),
-die sechs Regionen auf einer **selbst gezeichneten, schematischen Karte** (eine offizielle Map gibt
-es vor dem Release nicht), die Story mit Lucia und Jason, weitere Figuren und das Outro.
+die sechs Regionen auf einer **eigenen, illustrierten Luftbild-Karte** (Berge, Sumpf, Felder, Stadt,
+Hafen, Inselkette, Straßen, ziehende Wolken, leicht geneigt). Eine offizielle Map gibt es vor dem Release nicht, die Story mit Lucia und Jason, weitere Figuren und das Outro.
 
 **Logo:** An drei Stellen (Intro, „Die Story“, Outro) ist ein Logo-Platz mit Lichteffekt eingebaut.
 Lege das offizielle Logo als `assets/logo.png` ab (am besten mit transparentem Hintergrund) und
@@ -43,4 +43,4 @@ ein eigener „GTA 6“-Schriftzug als Platzhalter.
 **Echte Karte:** Rockstar stellt die offizielle Leonida-Karte laut eigener Ankündigung am Release-Tag
 (19.11.2026) als kostenlosen Download auf rockstargames.com bereit. Lege sie als `assets/map.png`
 (oder `.jpg`) ab und starte `python3 make_video2.py` neu: Die Karte ersetzt dann in den Map-Szenen
-die schematische Karte, mit langsamem Zoom, und die sechs Regionen erscheinen als Chips darunter.
+die eigene Karte, mit langsamem Zoom, und die sechs Regionen erscheinen als Chips darunter.

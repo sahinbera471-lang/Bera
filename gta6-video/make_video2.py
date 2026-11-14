@@ -58,7 +58,7 @@ mv.HIGHLIGHT = {"gta", "6", "map", "story", "figuren", "leonida", "florida", "vi
                 "verschwörung", "gefängnis", "army", "drogenschmuggler", "cal", "boobie", "ike", "raul", "bautista",
                 "social-media-chaos", "ps5", "xbox", "alligatoren", "region"}
 
-# ---------------------------------------------------------------- Karte (schematisch)
+# ---------------------------------------------------------------- Karte (eigene Illustration)
 LON0, LAT0, SX, SY = -87.8, 31.2, 120.0, 137.0
 MX0, MY0, PADM = 70, 300, 40
 MAP_W, MAP_H = int(7.8 * SX), int(6.8 * SY)
@@ -83,82 +83,275 @@ def proj(lon, lat, pad=PADM):
     return pad + (lon - LON0) * SX, pad + (LAT0 - lat) * SY
 
 
+CW, CH = MAP_W + 2 * PADM, MAP_H + 2 * PADM  # Karten-Leinwand (flach)
+TPAD = 20  # Rand für den Schatten nach der Neigung
+OUT_W, OUT_H = CW + 2 * TPAD, CH + 50
+MAP_OX, MAP_OY = MX0 - PADM - TPAD, MY0 - PADM  # Position der geneigten Karte im Frame
+_MAPX = {}  # Karte, Wolken, Kartenmaske (in init_worker gefüllt)
+
+
+def _homography(src, dst):
+    A, b = [], []
+    for (x, y), (u, v) in zip(src, dst):
+        A += [[x, y, 1, 0, 0, 0, -u * x, -u * y], [0, 0, 0, x, y, 1, -v * x, -v * y]]
+        b += [u, v]
+    return np.linalg.solve(np.array(A, float), np.array(b, float))
+
+
+TILT_SRC = [(0, 0), (CW, 0), (CW, CH), (0, CH)]
+TILT_DST = [(TPAD + 80, 44), (TPAD + CW - 80, 44), (TPAD + CW, CH + 8), (TPAD, CH + 8)]
+H_FWD = _homography(TILT_SRC, TILT_DST)
+H_INV = _homography(TILT_DST, TILT_SRC)
+
+
+def _hmap(Hm, x, y):
+    a, b, c_, d, e, f, g, h = Hm
+    w = g * x + h * y + 1
+    return (a * x + b * y + c_) / w, (d * x + e * y + f) / w
+
+
 def to_frame(lon, lat):
-    x, y = proj(lon, lat, 0)
-    return MX0 + x, MY0 + y
+    u, v = _hmap(H_FWD, *proj(lon, lat))
+    return MAP_OX + u, MAP_OY + v
+
+
+def value_noise(w, h, seed, octaves=((6, 1.0), (12, 0.5), (24, 0.25), (48, 0.125))):
+    rng = np.random.default_rng(seed)
+    acc, tot = np.zeros((h, w), np.float32), 0.0
+    for cells, amp in octaves:
+        g = rng.random((cells, max(2, int(cells * w / h))))
+        im = Image.fromarray((g * 255).astype(np.uint8)).resize((w, h), Image.BICUBIC)
+        acc += np.asarray(im, np.float32) / 255.0 * amp
+        tot += amp
+    return acc / tot
+
+
+_YY, _XX = np.mgrid[0:CH, 0:CW].astype(np.float32)
+
+
+def _blob(lon, lat, rx, ry=None):
+    cx, cy = proj(lon, lat)
+    ry = ry or rx
+    return np.exp(-(((_XX - cx) / rx) ** 2 + ((_YY - cy) / ry) ** 2) / 2)
+
+
+def _lerp(a, b, t):
+    t = np.clip(t, 0, 1)[..., None]
+    return np.asarray(a, np.float32) * (1 - t) + np.asarray(b, np.float32) * t
+
+
+def _road(d, pts, w=3):
+    xy = [proj(*p) for p in pts]
+    d.line(xy, fill=(70, 66, 60, 255), width=w + 2, joint="curve")
+    d.line(xy, fill=(226, 220, 204, 255), width=w, joint="curve")
 
 
 def build_map():
+    """Eigene, illustrierte Luftbild-Karte von Leonida (keine offizielle Karte).
+    Gibt die geneigte Karte (mit Schatten) und die Alpha-Maske der Kartenfläche zurück."""
+    rng = np.random.default_rng(11)
     ss = 2
-    size = (MAP_W + 2 * PADM, MAP_H + 2 * PADM)
-    big = (size[0] * ss, size[1] * ss)
 
     def P(lon, lat):
         x, y = proj(lon, lat)
         return x * ss, y * ss
 
-    mask = Image.new("L", big, 0)
-    md = ImageDraw.Draw(mask)
+    # Landmaske
+    m = Image.new("L", (CW * ss, CH * ss), 0)
+    md = ImageDraw.Draw(m)
     md.polygon([P(*p) for p in COAST], fill=255)
     keys = []
-    for i in range(15):  # Inselkette
+    for i in range(15):
         u = i / 14
-        lon = -80.42 - 1.38 * u
-        lat = 25.17 - 0.95 * u + 0.33 * u * u
-        r = (7 - 3 * u) * ss
+        lon, lat, r = -80.42 - 1.38 * u, 25.17 - 0.95 * u + 0.33 * u * u, 7 - 3 * u
+        keys.append((lon, lat))
         x, y = P(lon, lat)
-        keys.append((x, y, r))
-        md.ellipse((x - r * 1.5, y - r, x + r * 1.5, y + r), fill=255)
+        md.ellipse((x - r * 1.6 * ss, y - r * ss, x + r * 1.6 * ss, y + r * ss), fill=255)
     lx, ly = P(-80.8, 26.95)
-    lake = (lx - 26 * ss, ly - 28 * ss, lx + 26 * ss, ly + 28 * ss)
-    md.ellipse(lake, fill=0)
-    mask = mask.resize(size, Image.LANCZOS)
+    md.ellipse((lx - 26 * ss, ly - 28 * ss, lx + 26 * ss, ly + 28 * ss), fill=0)  # großer See
+    mask_img = m.resize((CW, CH), Image.LANCZOS)
+    M = np.asarray(mask_img, np.float32) / 255.0
 
-    land = grad(size, (24, 46, 74), (14, 28, 50), horizontal=False)
-    land.putalpha(mask.point(lambda v: v * 245 // 255))
+    # Wasser: Tiefe, Flachwasser, Brandung
+    nw = value_noise(CW, CH, 1)
+    ocean = _lerp((16, 74, 124), (9, 42, 90), _YY / CH * 0.6 + nw * 0.5)
+    near = np.asarray(mask_img.filter(ImageFilter.GaussianBlur(20)), np.float32) / 255
+    ocean = _lerp(ocean, (42, 178, 196), np.clip((near - 0.03) * 3.2, 0, 1) * 0.85)
+    rim = np.asarray(mask_img.filter(ImageFilter.GaussianBlur(4)), np.float32) / 255
+    ocean = _lerp(ocean, (205, 240, 238), np.clip((rim - 0.08) * 1.6, 0, 1) * 0.5)
 
-    tint = Image.new("RGBA", size, (0, 0, 0, 0))
-    td = ImageDraw.Draw(tint)
-    for name, _, col, lon, lat, _ in REGIONS:
+    # Land: Wiesen, Wälder, trockene Flächen
+    n1 = value_noise(CW, CH, 2)
+    n2 = value_noise(CW, CH, 3, ((20, 1.0), (40, 0.6), (80, 0.3)))
+    land = _lerp((38, 98, 56), (104, 150, 74), (n1 - 0.35) * 2.2)
+    land = _lerp(land, (150, 156, 98), np.clip((n2 - 0.6) * 3, 0, 1) * 0.6)
+    height = n1 * 0.25
+
+    # Mount Kalaga: Wald und Berge im Norden
+    mnt = _blob(-83.3, 30.45, 78, 50)
+    ridge = 1 - np.abs(2 * value_noise(CW, CH, 4, ((10, 1.0), (20, 0.6), (40, 0.35), (80, 0.2))) - 1)
+    hm = mnt * (0.35 + 0.95 * ridge)
+    height = height + hm * 1.8
+    land = _lerp(land, (28, 74, 44), np.clip(mnt * 1.4, 0, 1) * 0.75)
+    land = _lerp(land, (128, 118, 102), (hm - 0.5) * 3)
+    land = _lerp(land, (238, 236, 230), (hm - 1.0) * 5)
+
+    # Grassrivers: Sumpf
+    sw = np.clip(_blob(-81.05, 25.97, 72, 58) * 1.6, 0, 1)
+    land = _lerp(land, (56, 104, 84), sw * 0.85)
+
+    # Relief-Schattierung (Licht von oben links) und Strände
+    gy, gx = np.gradient(height * 70)
+    land = land * np.clip(1 + (-gx - gy) * 0.5, 0.62, 1.38)[..., None]
+    er = np.asarray(mask_img.filter(ImageFilter.MinFilter(7)), np.float32) / 255
+    land = _lerp(land, (230, 212, 160), np.clip(M - er, 0, 1) * 0.9)
+
+    rgb = ocean * (1 - M[..., None]) + land * M[..., None]
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
+
+    # Details auf dem Land
+    ov = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+    od = ImageDraw.Draw(ov)
+    cx, cy = proj(-81.05, 25.97)  # Wasserläufe im Sumpf
+    for _ in range(16):
+        x, y, ang = cx + rng.uniform(-85, 85), cy + rng.uniform(-60, 60), rng.uniform(0, 2 * np.pi)
+        pts = [(x, y)]
+        for _ in range(18):
+            ang += rng.uniform(-0.7, 0.7)
+            x, y = x + np.cos(ang) * 7, y + np.sin(ang) * 7
+            pts.append((x, y))
+        od.line(pts, fill=(54, 146, 156, 215), width=2)
+    fx, fy = proj(-81.3, 27.25)  # Ambrosia: Zuckerrohrfelder + Raffinerie
+    fcols = [(198, 188, 94), (160, 178, 74), (130, 158, 64), (178, 162, 86)]
+    for i in range(-6, 7):
+        for j in range(-5, 6):
+            if (i * 15 / 92) ** 2 + (j * 11 / 62) ** 2 > 1:
+                continue
+            x0, y0 = fx + i * 15, fy + j * 11
+            od.rectangle((x0, y0, x0 + 13, y0 + 9), fill=c4(fcols[rng.integers(4)], 235))
+    rx, ry = proj(-81.12, 27.05)
+    for k, (dx, dy, w_, h_) in enumerate([(0, 0, 22, 14), (24, 4, 12, 10), (-14, 6, 12, 8)]):
+        od.rectangle((rx + dx + 2, ry + dy + 2, rx + dx + w_ + 2, ry + dy + h_ + 2), fill=(50, 50, 55, 200))
+        od.rectangle((rx + dx, ry + dy, rx + dx + w_, ry + dy + h_), fill=(176, 178, 186, 255))
+    for k in range(3):
+        od.ellipse((rx + 4 + k * 6, ry - 6, rx + 8 + k * 6, ry - 2), fill=(90, 90, 96, 255))
+
+    # Straßen & Brücke über die Inseln
+    _road(od, [(-81.6, 30.45), (-81.25, 29.6), (-80.9, 28.7), (-80.62, 27.7), (-80.38, 26.85), (-80.33, 26.05)])
+    _road(od, [(-80.4, 26.15), (-81.0, 26.15), (-81.72, 26.18)])
+    _road(od, [(-80.62, 27.7), (-81.3, 27.32), (-81.95, 28.2), (-82.35, 29.25), (-83.2, 30.25)])
+    _road(od, [(-83.2, 30.25), (-84.3, 30.42), (-85.2, 29.95), (-86.4, 30.55), (-87.3, 30.62)])
+    _road(od, [(-81.6, 30.45), (-82.4, 30.42), (-83.2, 30.25)])
+    od.line([proj(-80.35, 25.45)] + [proj(lo, la) for lo, la in keys], fill=(226, 220, 204, 255), width=2)
+
+    # Vice City: dichte Stadt an der Südostküste
+    vx, vy = proj(-80.33, 25.98)
+    od.ellipse((vx - 40, vy - 100, vx + 40, vy + 100), fill=(112, 114, 122, 255))
+    for x in range(int(vx - 42), int(vx + 42), 8):
+        for y in range(int(vy - 104), int(vy + 104), 8):
+            if ((x - vx) / 40) ** 2 + ((y - vy) / 100) ** 2 > 1:
+                continue
+            s_ = rng.integers(4, 7)
+            g = int(rng.integers(170, 236))
+            od.rectangle((x + 2, y + 2, x + s_ + 2, y + s_ + 2), fill=(52, 52, 62, 200))
+            od.rectangle((x, y, x + s_, y + s_), fill=(g, g + 6 if g < 249 else g, min(255, g + 14), 255))
+    tx, ty = proj(-80.24, 25.8)
+    for _ in range(14):  # Hochhäuser in Downtown
+        x, y, s_ = tx + rng.uniform(-18, 14), ty + rng.uniform(-22, 22), rng.integers(7, 12)
+        od.rectangle((x + 4, y + 4, x + s_ + 4, y + s_ + 4), fill=(36, 36, 48, 220))
+        od.rectangle((x, y, x + s_, y + s_), fill=(214, 228, 244, 255))
+    for _ in range(26):  # Neon-Punkte
+        x, y = vx + rng.uniform(-30, 30), vy + rng.uniform(-90, 90)
+        od.ellipse((x - 1.5, y - 1.5, x + 1.5, y + 1.5), fill=c4(PINK if rng.random() < 0.5 else CYAN))
+    for _ in range(120):  # Vororte entlang der Küste
+        lat = rng.uniform(26.1, 27.6)
+        lon = -80.12 - (lat - 26.1) * 0.1 - rng.uniform(0.05, 0.45)
         x, y = proj(lon, lat)
-        r = 120 if name != "Leonida Keys" else 80
-        td.ellipse((x - r, y - r, x + r, y + r), fill=c4(col, 120))
-    tint = tint.filter(ImageFilter.GaussianBlur(45))
-    ta = np.minimum(np.array(tint.getchannel("A")), np.array(mask)).astype(np.uint8)
-    tint.putalpha(Image.fromarray(ta))
-    land.alpha_composite(tint)
+        g = int(rng.integers(180, 230))
+        od.rectangle((x, y, x + 3, y + 3), fill=(g, g, g + 8, 255))
 
-    grid = Image.new("RGBA", size, (0, 0, 0, 0))
-    gd = ImageDraw.Draw(grid)
-    for gx in range(0, size[0], 46):
-        gd.line([(gx, 0), (gx, size[1])], fill=(255, 255, 255, 16), width=1)
-    for gy in range(0, size[1], 46):
-        gd.line([(0, gy), (size[0], gy)], fill=(255, 255, 255, 16), width=1)
-    grid.putalpha(Image.fromarray(np.minimum(np.array(grid.getchannel("A")), np.array(mask))))
-    land.alpha_composite(grid)
+    # Port Gellhorn: Hafen mit Piers, Containern und Kränen
+    px, py = proj(-85.2, 29.86)
+    for _ in range(40):
+        x, y = px + rng.uniform(-28, 28), py + rng.uniform(-14, 10)
+        g = int(rng.integers(170, 225))
+        od.rectangle((x, y, x + 4, y + 4), fill=(g, g, g, 255))
+    ccols = [(200, 70, 60), (60, 110, 190), (232, 150, 50), (70, 160, 120)]
+    for i in range(6):
+        for j in range(3):
+            x0, y0 = px - 30 + i * 9, py + 14 + j * 5
+            od.rectangle((x0, y0, x0 + 7, y0 + 3), fill=c4(ccols[rng.integers(4)]))
+    ov_m = np.minimum(np.asarray(ov.getchannel("A")), (M * 255).astype(np.uint8))
+    ov.putalpha(Image.fromarray(ov_m))
+    img.alpha_composite(ov)
 
-    line = Image.new("RGBA", big, (0, 0, 0, 0))
-    ld = ImageDraw.Draw(line)
-    pts = [P(*p) for p in COAST]
-    ld.line(pts + [pts[0]], fill=c4(CYAN), width=4 * ss, joint="curve")
-    for x, y, r in keys:
-        ld.ellipse((x - r * 1.5, y - r, x + r * 1.5, y + r), outline=c4(CYAN), width=2 * ss)
-    ld.ellipse(lake, fill=(20, 70, 125, 255), outline=c4(CYAN), width=3 * ss)
-    line = line.resize(size, Image.LANCZOS)
-    glow = line.filter(ImageFilter.GaussianBlur(10))
-    out = Image.new("RGBA", size, (0, 0, 0, 0))
-    out.alpha_composite(glow)
-    out.alpha_composite(glow)
-    out.alpha_composite(land)
-    out.alpha_composite(line)
+    wat = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))  # Piers & Brückenpfeiler liegen im Wasser
+    wd = ImageDraw.Draw(wat)
+    for k in range(4):
+        x0 = px - 26 + k * 14
+        wd.rectangle((x0 + 2, py + 28, x0 + 7, py + 58), fill=(40, 40, 48, 160))
+        wd.rectangle((x0, py + 26, x0 + 5, py + 56), fill=(176, 176, 182, 255))
+        wd.line([(x0 + 2, py + 30), (x0 + 12, py + 22)], fill=(230, 120, 40, 255), width=2)
+    wd.line([proj(-80.35, 25.45)] + [proj(lo, la) for lo, la in keys], fill=(226, 220, 204, 220), width=2)
+    for _ in range(9):  # Boote
+        lo, la = rng.uniform(-80.05, -79.95), rng.uniform(25.5, 26.6)
+        x, y = proj(lo, la)
+        wd.line([(x, y), (x + 6, y + 2)], fill=(250, 250, 250, 230), width=2)
+    img.alpha_composite(wat)
+
+    # Licht: warm von oben links, dunkler unten rechts
+    lt = grad((CW, CH), (255, 196, 130), (0, 0, 40))
+    la_ = np.clip(1 - (_XX / CW + _YY / CH), -1, 1)
+    lt.putalpha(Image.fromarray((np.abs(la_) * 46).astype(np.uint8)))
+    img.alpha_composite(lt)
 
     # Nordpfeil
-    nx, ny = size[0] - 70, 70
-    arrow = ss_shape((40, 56), lambda d, k: d.polygon([(20 * k, 0), (40 * k - 1, 56 * k - 1), (20 * k, 42 * k),
-                                                       (0, 56 * k - 1)], fill=c4(WHITE, 200)))
-    paste(out, arrow, nx - 20, ny)
-    paste_c(out, text_img("N", font("xb", 30), MUTED), nx, ny + 62)
-    return out
+    arrow = ss_shape((36, 50), lambda d, k: d.polygon([(18 * k, 0), (36 * k - 1, 50 * k - 1), (18 * k, 38 * k),
+                                                       (0, 50 * k - 1)], fill=c4(WHITE, 230)))
+    paste(img, arrow, CW - 78, 52)
+    paste_c(img, text_img("N", font("xb", 28), WHITE), CW - 60, 106)
+
+    # Karte abrunden, Rahmen, neigen, Schatten
+    card = rrect(CW, CH, 36, (255, 255, 255, 255)).getchannel("A")
+    img.putalpha(Image.fromarray(np.minimum(np.asarray(img.getchannel("A")), np.asarray(card))))
+    img.alpha_composite(rrect(CW, CH, 36, (0, 0, 0, 0), outline=(255, 255, 255, 150), width=3))
+    tilted = img.transform((OUT_W, OUT_H), Image.PERSPECTIVE, tuple(H_INV), Image.BICUBIC)
+    alpha = np.asarray(tilted.getchannel("A")).copy()
+    sh = Image.new("L", (OUT_W, OUT_H), 0)
+    sh.paste(tilted.getchannel("A"), (0, 14))
+    out = Image.new("RGBA", (OUT_W, OUT_H), (0, 0, 0, 0))
+    out.putalpha(sh.filter(ImageFilter.GaussianBlur(14)).point(lambda v: v * 6 // 10))
+    out.alpha_composite(tilted)
+    return out, alpha
+
+
+def build_clouds():
+    n = value_noise(OUT_W * 2, OUT_H, 9, ((3, 1.0), (6, 0.6), (12, 0.35), (24, 0.2)))
+    a = (np.clip((n - 0.55) * 5, 0, 1) * 150).astype(np.uint8)
+    cl = Image.new("RGBA", (OUT_W * 2, OUT_H), (255, 255, 255, 0))
+    cl.putalpha(Image.fromarray(a).filter(ImageFilter.GaussianBlur(6)))
+    return cl
+
+
+def map_static_fn():
+    return lambda frame, st: paste(frame, _MAPX["map"], MAP_OX, MAP_OY)
+
+
+def cloud_fn(scene_start, fade_in_at=None):
+    def fn(frame, st):
+        f = 1.0
+        if fade_in_at is not None:
+            if st < fade_in_at:
+                return
+            f = min(1.0, (st - fade_in_at) / 0.8)
+        off = int((scene_start + st - _MAPX["t0"]) * 14) % OUT_W
+        cl = _MAPX["clouds"].crop((off, 0, off + OUT_W, OUT_H))
+        a = np.minimum(np.asarray(cl.getchannel("A")), _MAPX["alpha"])
+        if f < 1:
+            a = (a * f).astype(np.uint8)
+        cl.putalpha(Image.fromarray(a))
+        paste(frame, cl, MAP_OX, MAP_OY)
+    return fn
 
 
 def real_map_path():
@@ -371,7 +564,7 @@ def scene_map_intro(s, c, mp):
         s.add_panel(p, RM_X + 755, 1003, kw(c, "doppelt"), "right")
         real_map_credit(s, 1.2)
         return
-    it = {"x": MX0 - PADM, "y": MY0 - PADM}
+    it = {"x": MAP_OX, "y": MAP_OY}
 
     def reveal(frame, st):
         p = ease_out(min(1.0, max(0.0, (st - 0.1) / 1.3)))
@@ -383,14 +576,16 @@ def scene_map_intro(s, c, mp):
             ImageDraw.Draw(frame).line([(it["x"], it["y"] + yr), (it["x"] + mp.width, it["y"] + yr)],
                                        fill=c4(CYAN), width=4)
     s.pre.append(reveal)
-    s.add(grad_text("LEONIDA", fit("LEONIDA", "black", 130, 520), (255, 205, 95), PINK), 322, 600, kw(c, "leonida"), "pop")
-    s.add(text_img("inspiriert von Florida", font("b", 42)), 322, 745, kw(c, "florida"))
-    p = panel(520, 240, ORANGE)
-    paste_c(p, text_img("MAP-GRÖSSE", font("sb", 32), MUTED), SH + 260, SH + 28)
-    paste_c(p, text_img("≈ 2× GTA 5", font("black", 84), ORANGE), SH + 260, SH + 80)
-    paste_c(p, text_img("laut Preview-Berichten", font("m", 30), MUTED), SH + 260, SH + 186)
-    s.add_panel(p, 322, 850, kw(c, "doppelt"))
-    s.add(text_img("Schematische Karte · keine offizielle Map", font("m", 26), MUTED), W / 2, 1238, 1.2, "fade")
+    s.pre.append(cloud_fn(c["start"], fade_in_at=1.5))
+    s.add_panel(panel(520, 600, None, fill=(10, 12, 30, 215)), 322, 580, kw(c, "leonida") - 0.15, "fade")
+    s.add(grad_text("LEONIDA", fit("LEONIDA", "black", 130, 470), (255, 205, 95), PINK), 322, 605, kw(c, "leonida"), "pop")
+    s.add(text_img("inspiriert von Florida", font("b", 42)), 322, 750, kw(c, "florida"))
+    p = panel(470, 240, ORANGE)
+    paste_c(p, text_img("MAP-GRÖSSE", font("sb", 32), MUTED), SH + 235, SH + 28)
+    paste_c(p, text_img("≈ 2× GTA 5", font("black", 80), ORANGE), SH + 235, SH + 80)
+    paste_c(p, text_img("laut Preview-Berichten", font("m", 30), MUTED), SH + 235, SH + 186)
+    s.add_panel(p, 322, 870, kw(c, "doppelt"))
+    s.add(text_img("Illustration · keine offizielle Map", font("m", 26), MUTED), W / 2, 1300, 1.2, "fade")
 
 
 def regions_panel_items(s, c, show, animate, t_panel):
@@ -425,9 +620,9 @@ def scene_regions_a(s, c, mp):
         region_chips(s, c, show={0, 1, 2}, animate={0, 1, 2})
         real_map_credit(s, -5)
         return
-    s.add(mp, MX0 - PADM + mp.width / 2, MY0 - PADM, -5, glow=False)
+    s.pre += [map_static_fn(), cloud_fn(c["start"])]
     regions_panel_items(s, c, show={0, 1, 2}, animate={0, 1, 2}, t_panel=0.0)
-    s.add(text_img("Schematische Karte · keine offizielle Map", font("m", 26), MUTED), W / 2, 1238, -5, "fade")
+    s.add(text_img("Illustration · keine offizielle Map", font("m", 26), MUTED), W / 2, 1300, -5, "fade")
 
 
 def scene_regions_b(s, c, mp):
@@ -437,9 +632,9 @@ def scene_regions_b(s, c, mp):
         region_chips(s, c, show=set(range(6)), animate={3, 4, 5})
         real_map_credit(s, -5)
         return
-    s.add(mp, MX0 - PADM + mp.width / 2, MY0 - PADM, -5, glow=False)
+    s.pre += [map_static_fn(), cloud_fn(c["start"])]
     regions_panel_items(s, c, show=set(range(6)), animate={3, 4, 5}, t_panel=-5)
-    s.add(text_img("Schematische Karte · keine offizielle Map", font("m", 26), MUTED), W / 2, 1238, -5, "fade")
+    s.add(text_img("Illustration · keine offizielle Map", font("m", 26), MUTED), W / 2, 1300, -5, "fade")
 
 
 def scene_story_sting(s, c):
@@ -529,7 +724,7 @@ def scene_outro(s, c):
           W / 2, bottom + 370, kw(c, "region"))
     s.add(text_img("Schreib's in die Kommentare!", font("sb", 42), MUTED), W / 2, bottom + 440, kw(c, "region") + 0.4)
     note = ("Inoffizielles Fan-Video · GTA VI & Leonida-Karte © Rockstar Games" if _REAL
-            else "Inoffizielles Fan-Video · Karte schematisch, keine offizielle Map")
+            else "Inoffizielles Fan-Video · Karte: eigene Illustration, nicht offiziell")
     s.add(text_img(note, fit(note, "m", 25, 980), MUTED), W / 2, 1190, 0.6, "fade")
     note2 = "Stand: 14.11.2026" if _REAL else "GTA VI © Rockstar Games · Stand: 14.11.2026"
     s.add(text_img(note2, font("m", 25), MUTED), W / 2, 1226, 0.6, "fade")
@@ -566,7 +761,8 @@ def init_worker():
     bg, _ = build_backgrounds()
     dim = bg.copy()
     dim.alpha_composite(Image.new("RGBA", (W, H), (5, 5, 16, 150)))
-    mp = build_map()
+    mp, mp_alpha = build_map()
+    _MAPX.update(map=mp, alpha=mp_alpha, clouds=build_clouds(), t0=clips[1]["start"])
     _REAL.clear()
     rp = real_map_path()
     if rp:
@@ -646,7 +842,7 @@ def main():
     assert total <= 90.0, f"Video zu lang: {total:.2f}s"
     nframes = int(math.ceil(total * FPS))
     print(f"Dauer {total:.2f}s, {nframes} Frames, Logo-Datei: {'ja' if os.path.exists(LOGO) else 'nein (Platzhalter)'}, "
-          f"echte Karte: {real_map_path() or 'nein (schematische Karte)'}")
+          f"echte Karte: {real_map_path() or 'nein (eigene Illustration)'}")
     tmp = tempfile.mkdtemp(prefix="gta6b_")
     wav = os.path.join(tmp, "mix.wav")
     mv.build_audio(clips, total, wav, booms=(0, 4, 9))
