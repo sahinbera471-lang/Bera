@@ -20,3 +20,22 @@ Hochkant-Video (1080×1920, 30 fps, ca. 93 s) für TikTok / Reels / Shorts.
 10. Outro mit Call-to-Action
 
 Stand der Infos: 13.11.2026. Inoffizielles Fan-Video, keine Rechtsberatung.
+
+---
+
+# Video 2: GTA 6 – Map, Story & Figuren
+
+Hochkant-Video (1080×1920, 30 fps, ca. 1:23 Min.).
+
+- `GTA6_Map_Story_Figuren.mp4` – fertiges Video
+- `voiceover2/s01.mp3 … s10.mp3` – Sprecheraufnahmen (ElevenLabs, Stimme „Timon“)
+- `make_video2.py` – rendert das Video neu: `python3 make_video2.py`
+
+Inhalt: Leonida und die Map-Größe (laut Preview-Berichten etwa doppelt so groß wie GTA 5),
+die sechs Regionen auf einer **selbst gezeichneten, schematischen Karte** (eine offizielle Map gibt
+es vor dem Release nicht), die Story mit Lucia und Jason, weitere Figuren und das Outro.
+
+**Logo:** An drei Stellen (Intro, „Die Story“, Outro) ist ein Logo-Platz mit Lichteffekt eingebaut.
+Lege das offizielle Logo als `assets/logo.png` ab (am besten mit transparentem Hintergrund) und
+starte `python3 make_video2.py` neu, dann wird es dort automatisch eingesetzt. Ohne Datei erscheint
+ein eigener „GTA 6“-Schriftzug als Platzhalter.

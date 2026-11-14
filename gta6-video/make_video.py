@@ -776,7 +776,7 @@ def movavg(x, n):
     return np.concatenate([np.full(n // 2, y[0]), y, np.full(len(x) - len(y) - n // 2, y[-1])])
 
 
-def build_audio(clips, total, path):
+def build_audio(clips, total, path, booms=(0, 6)):
     n = int(total * SR) + SR
     rng = np.random.default_rng(3)
     bpm = 104
@@ -843,7 +843,7 @@ def build_audio(clips, total, path):
     for k, c in enumerate(clips):
         if k > 0:
             add_at(sfx, whoosh, (c["start"] - 0.45) * SR)
-        if k in (0, 6):
+        if k in booms:
             add_at(sfx, boom, c["start"] * SR)
 
     mix = voice + music + sfx
