@@ -626,6 +626,250 @@ VIDEOS = {
 }
 
 
+# ---------------------------------------------------------------- Video: Faktencheck
+VERDICT = {"ok": (GREEN, "BESTÄTIGT"), "mid": (YELLOW, "BERICHTET"), "no": (RED, "GERÜCHT")}
+
+
+def vicon(kind, size=70, bg=None):
+    col = bg or VERDICT[kind][0]
+
+    def fn(d, k):
+        S = size * k
+        d.ellipse((0, 0, S - 1, S - 1), fill=c4(col))
+        lw = int(S * .12)
+        if kind == "ok":
+            d.line([(S * .27, S * .53), (S * .44, S * .70), (S * .75, S * .35)], fill=c4(DARK), width=lw, joint="curve")
+        elif kind == "no":
+            d.line([(S * .32, S * .32), (S * .68, S * .68)], fill=c4(DARK), width=lw)
+            d.line([(S * .68, S * .32), (S * .32, S * .68)], fill=c4(DARK), width=lw)
+        else:
+            d.line([(S * .25, S * .5), (S * .75, S * .5)], fill=c4(DARK), width=lw)
+    return ss_shape((size, size), fn)
+
+
+def stamp(kind, label=None, size=52, rot=-6):
+    col, default = VERDICT[kind]
+    ic = vicon(kind, int(size * 1.25), bg=WHITE)
+    t = text_img(label or default, font("black", size), DARK)
+    pad = 24
+    w, h = ic.width + t.width + 3 * pad, max(ic.height, t.height) + 30
+    im = rrect(w, h, h // 2, c4(col), outline=c4(WHITE), width=5)
+    paste(im, ic, pad, (h - ic.height) / 2)
+    paste(im, t, 2 * pad + ic.width, (h - t.height) / 2)
+    return im.rotate(rot, resample=Image.BICUBIC, expand=True) if rot else im
+
+
+def picto(name, size=150, color=WHITE):
+    """Einfache, eigene Piktogramme."""
+    def fn(d, k):
+        S = size * k
+        lw = max(2, int(S * .07))
+        C = c4(color)
+        if name == "walk":
+            d.ellipse((S * .42, S * .04, S * .6, S * .22), fill=C)
+            d.line([(S * .5, S * .26), (S * .46, S * .58)], fill=C, width=lw)
+            d.line([(S * .46, S * .58), (S * .32, S * .92)], fill=C, width=lw)
+            d.line([(S * .46, S * .58), (S * .64, S * .9)], fill=C, width=lw)
+            d.line([(S * .3, S * .44), (S * .5, S * .32), (S * .7, S * .48)], fill=C, width=lw)
+        elif name == "car":
+            d.rounded_rectangle((S * .06, S * .45, S * .94, S * .72), int(S * .08), fill=C)
+            d.polygon([(S * .24, S * .46), (S * .34, S * .26), (S * .66, S * .26), (S * .78, S * .46)], fill=C)
+            for cx in (S * .27, S * .73):
+                d.ellipse((cx - S * .11, S * .62, cx + S * .11, S * .84), fill=c4(DARK), outline=C, width=lw)
+        elif name == "plane":
+            d.polygon([(S * .5, S * .04), (S * .56, S * .3), (S * .96, S * .55), (S * .96, S * .62), (S * .56, S * .52),
+                       (S * .55, S * .8), (S * .68, S * .9), (S * .68, S * .96), (S * .5, S * .91), (S * .32, S * .96),
+                       (S * .32, S * .9), (S * .45, S * .8), (S * .44, S * .52), (S * .04, S * .62), (S * .04, S * .55),
+                       (S * .44, S * .3)], fill=C)
+        elif name == "fish":
+            d.ellipse((S * .12, S * .3, S * .72, S * .7), fill=C)
+            d.polygon([(S * .66, S * .5), (S * .94, S * .28), (S * .94, S * .72)], fill=C)
+            d.ellipse((S * .24, S * .42, S * .32, S * .5), fill=c4(DARK))
+        elif name == "waves":
+            for row in range(3):
+                y0 = S * (.3 + row * .2)
+                pts = [(S * (.06 + u * .88), y0 + math.sin(u * math.pi * 4) * S * .06) for u in np.linspace(0, 1, 30)]
+                d.line(pts, fill=C, width=lw, joint="curve")
+        elif name == "golf":
+            d.line([(S * .4, S * .08), (S * .4, S * .86)], fill=C, width=lw)
+            d.polygon([(S * .42, S * .08), (S * .82, S * .22), (S * .42, S * .36)], fill=c4(PINK))
+            d.ellipse((S * .18, S * .8, S * .82, S * .96), fill=C)
+            d.ellipse((S * .6, S * .66, S * .72, S * .78), fill=C)
+        elif name == "dumbbell":
+            d.rectangle((S * .2, S * .46, S * .8, S * .54), fill=C)
+            for x0 in (S * .08, S * .76):
+                d.rounded_rectangle((x0, S * .26, x0 + S * .16, S * .74), int(S * .03), fill=C)
+        elif name == "ball":
+            d.ellipse((S * .06, S * .06, S * .94, S * .94), fill=c4(ORANGE))
+            d.line([(S * .5, S * .06), (S * .5, S * .94)], fill=c4(DARK), width=lw // 2 + 1)
+            d.line([(S * .06, S * .5), (S * .94, S * .5)], fill=c4(DARK), width=lw // 2 + 1)
+            d.arc((-S * .2, S * .1, S * .5, S * .9), -60, 60, fill=c4(DARK), width=lw // 2 + 1)
+            d.arc((S * .5, S * .1, S * 1.2, S * .9), 120, 240, fill=c4(DARK), width=lw // 2 + 1)
+        elif name == "eye":
+            d.ellipse((S * .04, S * .26, S * .96, S * .74), outline=C, width=lw)
+            d.ellipse((S * .36, S * .32, S * .64, S * .68), fill=C)
+        elif name == "shirt":
+            d.polygon([(S * .32, S * .12), (S * .68, S * .12), (S * .94, S * .3), (S * .82, S * .46), (S * .72, S * .4),
+                       (S * .72, S * .9), (S * .28, S * .9), (S * .28, S * .4), (S * .18, S * .46), (S * .06, S * .3)], fill=C)
+        elif name == "bubble":
+            d.rounded_rectangle((S * .04, S * .1, S * .96, S * .7), int(S * .16), fill=C)
+            d.polygon([(S * .22, S * .66), (S * .44, S * .66), (S * .2, S * .9)], fill=C)
+        elif name == "pump":
+            d.rounded_rectangle((S * .16, S * .1, S * .62, S * .92), int(S * .05), fill=C)
+            d.rectangle((S * .24, S * .2, S * .54, S * .38), fill=c4(DARK))
+            d.line([(S * .62, S * .3), (S * .8, S * .4), (S * .8, S * .74), (S * .88, S * .8)], fill=C, width=lw,
+                   joint="curve")
+            d.rectangle((S * .1, S * .88, S * .68, S * .96), fill=C)
+        elif name == "magnifier":
+            d.ellipse((S * .06, S * .06, S * .66, S * .66), outline=C, width=int(S * .09))
+            d.line([(S * .58, S * .58), (S * .92, S * .92)], fill=C, width=int(S * .13))
+        elif name == "bag":
+            d.rounded_rectangle((S * .12, S * .3, S * .88, S * .92), int(S * .1), fill=C)
+            d.arc((S * .3, S * .06, S * .7, S * .5), 180, 360, fill=C, width=lw)
+    return ss_shape((size, size), fn)
+
+
+_MAPCACHE = {}
+
+
+def small_map(scale=0.6):
+    if "img" not in _MAPCACHE:
+        mp, _ = mv2.build_map()
+        _MAPCACHE["img"] = mp.resize((int(mp.width * scale), int(mp.height * scale)), Image.LANCZOS)
+    return _MAPCACHE["img"]
+
+
+def claim_card(text, kind, sub=None, w=920):
+    col = VERDICT[kind][0]
+    lines = [(text, "b", 44, WHITE)]
+    if sub:
+        lines.append((sub, "xb", 32, col))
+    return mk_card(lines, w=w, accent=col, icon=vicon(kind, 84), align="left")
+
+
+def f1(s, c):
+    s.add(picto("magnifier", 190, WHITE), W / 2, 270, 0.0, "pop", glow=False)
+    add_title(s, "FAKTENCHECK", 500, 0.15, size=150, c1=CYAN, c2=PINK)
+    add_text(s, "GTA 6: Was ist echt – was ist Gerücht?", 680, kw(c, "stimmt"), size=46, weight="xb")
+    for i, kind in enumerate(("ok", "mid", "no")):
+        s.add(stamp(kind, size=32, rot=0), 200 + i * 340, 800, kw(c, "faktencheck") + 0.2 * i, "pop", glow=False)
+
+
+def f2(s, c):
+    s.add(with_alpha(small_map(), 0.85), W / 2, 290, 0.0, "fade", glow=False)
+    for i, (name, txt, word) in enumerate([("walk", "178 Min.", "178"), ("car", "35 Min.", "35"),
+                                           ("plane", "7 Min.", "flugzeug")]):
+        p = panel(320, 180, RED)
+        paste_c(p, picto(name, 70), SH + 160, SH + 16)
+        ti = text_img(txt, font("black", 56))
+        tx, ty = SH + 160 - ti.width / 2, SH + 100
+        paste(p, ti, tx, ty)
+        ImageDraw.Draw(p).line([(tx - 6, ty + ti.height / 2), (tx + ti.width + 6, ty + ti.height / 2)],
+                               fill=c4(RED, 235), width=6)
+        s.add_panel(p, 190 + i * 350, 975, kw(c, word), "up")
+    s.add(stamp("no", size=64), W / 2, 520, kw(c, "nie"), "pop", glow=False)
+    add_text(s, "Keine offiziellen Zeiten · Karte: eigene Illustration", 1165, kw(c, "map"), size=30, weight="m",
+             color=MUTED, anim="fade")
+
+
+def f3(s, c):
+    s.add(with_alpha(small_map(), 0.85), W / 2, 290, -5, "fade", glow=False)
+    s.add_panel(mk_card([("≈ 2× GTA 5", "black", 84, [WARM, PINK]), ("laut Preview-Berichten", "b", 38, WHITE),
+                         ("keine offizielle Zahl von Rockstar", "m", 32, MUTED)], accent=YELLOW), W / 2, 930,
+                kw(c, "doppelt"))
+    s.add(stamp("mid", size=64), W / 2, 520, kw(c, "berichtet"), "pop", glow=False)
+
+
+def f4(s, c):
+    add_title(s, "NEBENAKTIVITÄTEN", 300, 0.0, size=110, c1=GREEN, c2=CYAN)
+    tiles = [("fish", "Angeln", "ok", "angeln"), ("waves", "Jetski", "ok", "jetski"), ("golf", "Minigolf", "ok", "minigolf"),
+             ("dumbbell", "Fitnessstudio", "ok", "fitnessstudio"), ("ball", "Basketball", "mid", "basketball"),
+             ("waves", "Tauchen · Airboat", "ok", "basketball")]
+    for i, (pic, label, kind, word) in enumerate(tiles):
+        col = VERDICT[kind][0]
+        p = panel(300, 260, col)
+        paste_c(p, picto(pic, 120, WHITE), SH + 150, SH + 26)
+        lab = text_img(label, fit(label, "b", 38, 270))
+        paste_c(p, lab, SH + 150, SH + 160)
+        sub = "nur im Trailer" if kind == "mid" else "von Rockstar gezeigt"
+        paste_c(p, text_img(sub, font("m", 24), col), SH + 150, SH + 212)
+        paste(p, vicon(kind, 54), SH + 236, SH + 12)
+        t = kw(c, word) + (0.35 if i == 5 else 0)
+        s.add_panel(p, 200 + (i % 3) * 340, 450 + (i // 3) * 300, t, "pop")
+    s.add(stamp("ok", size=52), W / 2, 1060, kw(c, "stimmt"), "pop", glow=False)
+
+
+def f5(s, c):
+    add_title(s, "DIE POLIZEI", 300, 0.0, size=130, c1=CYAN, c2=VIOLET)
+    rows = [("Verbrechen braucht Zeugen oder Alarm", "ok", "laut Rockstar", "zeugen"),
+            ("Cops merken sich dein Outfit", "ok", "laut Rockstar", "outfit"),
+            ("4 Stufen bis „Psycho“", "no", "nicht bestätigt", "psycho")]
+    for i, (txt, kind, sub, word) in enumerate(rows):
+        s.add_panel(claim_card(txt, kind, sub), W / 2, 470 + i * 190, kw(c, word), "left")
+    add_text(s, "Quelle: Rockstar North im IGN-Interview (Aug. 2026)", 1060, kw(c, "zeugen") + 0.6, size=30,
+             weight="m", color=MUTED, anim="fade")
+
+
+def f6(s, c):
+    bub = picto("bubble", 230, WHITE)
+    q = text_img("?", font("black", 120), DARK)
+    paste_c(bub, q, 115, 18)
+    s.add(bub, W / 2, 270, 0.0, "pop", glow=False)
+    add_text(s, "Passanten erinnern sich an dich?", 560, 0.2, size=62, weight="black", maxw=980)
+    s.add_panel(mk_card([("nur eine Deutung einer Trailer-Szene", "b", 44, WHITE)], accent=RED), W / 2, 690,
+                kw(c, "deutung"))
+    s.add(stamp("no", "NICHT BESTÄTIGT", size=56), W / 2, 880, kw(c, "bestätigt"), "pop", glow=False)
+
+
+def f7(s, c):
+    s.add(picto("bag", 170, YELLOW), W / 2, 270, 0.0, "pop", glow=False)
+    add_title(s, "GELD & RAUB", 470, 0.1, size=120, c1=YELLOW, c2=ORANGE)
+    s.add_panel(claim_card("Läden ausrauben & Beute beim Hehler", "mid", "BERICHTET"), W / 2, 640, kw(c, "ausrauben"),
+                "left")
+    s.add_panel(claim_card("Bank-, Bar- & Beutegeld-System", "no", "NICHTS OFFIZIELLES"), W / 2, 850,
+                kw(c, "geldsystem"), "left")
+
+
+def f8(s, c):
+    s.add(picto("pump", 220, WHITE), W / 2, 270, 0.0, "pop", glow=False)
+    add_title(s, "10 SEK. TANKEN?", 540, kw(c, "tanken"), size=120, c1=WARM, c2=PINK)
+    s.add_panel(mk_card([("steht nur auf einer einzigen Fan-Seite", "b", 44, WHITE)], accent=RED), W / 2, 720,
+                kw(c, "fan-seite"))
+    s.add(stamp("no", size=70), W / 2, 900, kw(c, "gerücht"), "pop", glow=False)
+
+
+def f9(s, c):
+    add_title(s, "GLAUB NICHT ALLES!", 320, kw(c, "glaub"), size=110, c1=CYAN, c2=PINK)
+    add_text(s, "Ab 19.11. wissen wir's genau", 500, kw(c, "19"), size=60, weight="black")
+    s.add(pill("FOLG MIR FÜR ECHTE FAKTEN", PINK, DARK, size=44, padx=40, pady=22), W / 2, 630, kw(c, "folg"), "pop")
+    for i, kind in enumerate(("ok", "mid", "no")):
+        s.add(stamp(kind, size=30, rot=0), 200 + i * 340, 790, 0.3 + 0.15 * i, "fade", glow=False)
+    add_logo(s, W / 2, 900, 0.5, max_w=420, max_h=150)
+    disclaimer(s, "Stand: 14.11.2026 · Quellen: Rockstar/IGN, SVG, GTA-6-Tracker",
+               "Inoffizielles Fan-Video · alle Grafiken selbst erstellt")
+
+
+VIDEOS["faktencheck"] = dict(
+    out="GTA6_Faktencheck.mp4", header="GTA 6 · FAKTENCHECK", booms=(0,),
+    scenes=[f1, f2, f3, f4, f5, f6, f7, f8, f9],
+    tags=[None, ("#1 DIE MAP-ZEITEN", RED), ("#2 MAP-GRÖSSE", YELLOW), ("#3 AKTIVITÄTEN", GREEN), ("#4 POLIZEI", CYAN),
+          ("#5 NPCs", RED), ("#6 GELD", YELLOW), ("#7 TANKEN", RED), None],
+    highlight={"gta-6-fakten", "faktencheck", "178", "35", "7", "rockstar", "map", "gta", "5", "doppelt", "angeln",
+               "jetski", "minigolf", "fitnessstudio", "basketball", "zeugen", "alarm", "outfit", "psycho", "bestätigt",
+               "gerücht", "berichtet", "hehler", "beutegeld", "10", "19", "fan-seite", "offizielles"},
+    captions=[
+        "Auf TikTok kursieren gerade jede Menge GTA-6-Fakten. Aber was davon stimmt wirklich? Zeit für den Faktencheck!",
+        "Erstens: 178 Minuten zu Fuß, 35 mit dem Auto, 7 mit dem Flugzeug? Diese Zeiten hat Rockstar nie genannt – und die bunten Karten dazu sind keine echte Map.",
+        "Was dagegen berichtet wird: Die Map soll etwa doppelt so groß sein wie in GTA 5. Eine offizielle Zahl gibt es aber nicht.",
+        "Nebenaktivitäten? Das stimmt! Angeln, Jetski, Minigolf und Fitnessstudio hat Rockstar gezeigt. Basketball sieht man bisher nur im Trailer.",
+        "Die Polizei: Laut Rockstar braucht ein Verbrechen Zeugen oder einen Alarm – und die Cops merken sich dein Outfit. 4 Stufen bis „Psycho“? Nicht bestätigt.",
+        "Dass sich Passanten an dich erinnern, ist nur eine Deutung einer Trailer-Szene. Auch das ist nicht bestätigt.",
+        "Läden ausrauben und Beute beim Hehler verkaufen wird berichtet. Aber ein Geldsystem mit Bank-, Bar- und Beutegeld? Dazu gibt es nichts Offizielles.",
+        "Und „Tanken dauert 10 Sekunden“? Das steht nur auf einer einzigen Fan-Seite. Klares Gerücht!",
+        "Also: Glaub nicht alles, was du siehst. Ab dem 19. November wissen wir es genau. Folg mir für echte GTA-6-Fakten!",
+    ])
+
+
 # ---------------------------------------------------------------- Rendering
 _S = {}
 
