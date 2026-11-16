@@ -1,0 +1,706 @@
+{
+ "number": 1,
+ "title": "Die erste Stadt",
+ "duration": 60,
+ "fps": 30,
+ "width": 1080,
+ "height": 1920,
+ "followers": 0,
+ "budget": 0,
+ "spent": 0,
+ "todKeys": [
+  [
+   0,
+   0.1
+  ],
+  [
+   42,
+   0.22
+  ],
+  [
+   47.2,
+   0.62
+  ],
+  [
+   50,
+   0.92
+  ],
+  [
+   53,
+   1
+  ]
+ ],
+ "effects": [
+  {
+   "type": "survey",
+   "start": 5.3,
+   "end": 9
+  }
+ ],
+ "phases": {
+  "survey": 5,
+  "road": 9,
+  "area": 18,
+  "building": 24,
+  "tree": 41,
+  "lamps": 46,
+  "final": 52
+ },
+ "builds": [
+  {
+   "id": "road_main",
+   "start": 9,
+   "end": 17
+  },
+  {
+   "id": "road_side",
+   "start": 15.5,
+   "end": 19.5
+  },
+  {
+   "id": "plaza_1",
+   "start": 18,
+   "end": 24.6
+  },
+  {
+   "id": "house_1",
+   "start": 22.5,
+   "end": 30
+  },
+  {
+   "id": "house_2",
+   "start": 28.2,
+   "end": 35.6
+  },
+  {
+   "id": "house_3",
+   "start": 33.9,
+   "end": 41.3
+  },
+  {
+   "id": "tree_18",
+   "start": 41.3,
+   "end": 42.4
+  },
+  {
+   "id": "tree_17",
+   "start": 41.4,
+   "end": 42.5
+  },
+  {
+   "id": "tree_15",
+   "start": 41.6,
+   "end": 42.7
+  },
+  {
+   "id": "tree_14",
+   "start": 41.7,
+   "end": 42.8
+  },
+  {
+   "id": "tree_13",
+   "start": 41.9,
+   "end": 43
+  },
+  {
+   "id": "tree_21",
+   "start": 42,
+   "end": 43.1
+  },
+  {
+   "id": "tree_5",
+   "start": 42.2,
+   "end": 43.3
+  },
+  {
+   "id": "tree_9",
+   "start": 42.3,
+   "end": 43.4
+  },
+  {
+   "id": "tree_6",
+   "start": 42.5,
+   "end": 43.6
+  },
+  {
+   "id": "tree_1",
+   "start": 42.6,
+   "end": 43.7
+  },
+  {
+   "id": "tree_2",
+   "start": 42.8,
+   "end": 43.9
+  },
+  {
+   "id": "tree_23",
+   "start": 42.9,
+   "end": 44
+  },
+  {
+   "id": "tree_3",
+   "start": 43.1,
+   "end": 44.2
+  },
+  {
+   "id": "tree_4",
+   "start": 43.2,
+   "end": 44.3
+  },
+  {
+   "id": "tree_7",
+   "start": 43.4,
+   "end": 44.5
+  },
+  {
+   "id": "tree_8",
+   "start": 43.5,
+   "end": 44.6
+  },
+  {
+   "id": "tree_10",
+   "start": 43.7,
+   "end": 44.8
+  },
+  {
+   "id": "tree_20",
+   "start": 43.8,
+   "end": 44.9
+  },
+  {
+   "id": "tree_11",
+   "start": 44,
+   "end": 45.1
+  },
+  {
+   "id": "tree_12",
+   "start": 44.1,
+   "end": 45.2
+  },
+  {
+   "id": "tree_16",
+   "start": 44.3,
+   "end": 45.4
+  },
+  {
+   "id": "tree_19",
+   "start": 44.4,
+   "end": 45.5
+  },
+  {
+   "id": "tree_24",
+   "start": 44.6,
+   "end": 45.7
+  },
+  {
+   "id": "tree_22",
+   "start": 44.7,
+   "end": 45.8
+  },
+  {
+   "id": "lamp_4",
+   "start": 46.2,
+   "end": 47.1
+  },
+  {
+   "id": "lamp_7",
+   "start": 46.5,
+   "end": 47.4
+  },
+  {
+   "id": "lamp_3",
+   "start": 46.7,
+   "end": 47.6
+  },
+  {
+   "id": "lamp_8",
+   "start": 47,
+   "end": 47.9
+  },
+  {
+   "id": "lamp_10",
+   "start": 47.2,
+   "end": 48.1
+  },
+  {
+   "id": "lamp_9",
+   "start": 47.5,
+   "end": 48.4
+  },
+  {
+   "id": "lamp_12",
+   "start": 47.7,
+   "end": 48.6
+  },
+  {
+   "id": "lamp_6",
+   "start": 48,
+   "end": 48.9
+  },
+  {
+   "id": "lamp_11",
+   "start": 48.2,
+   "end": 49.1
+  },
+  {
+   "id": "lamp_2",
+   "start": 48.5,
+   "end": 49.4
+  },
+  {
+   "id": "lamp_5",
+   "start": 48.7,
+   "end": 49.6
+  },
+  {
+   "id": "lamp_1",
+   "start": 49,
+   "end": 49.9
+  }
+ ],
+ "shots": [
+  {
+   "type": "move",
+   "start": 0,
+   "end": 5,
+   "ease": "inOut",
+   "from": {
+    "pos": [
+     -150,
+     12,
+     187.8
+    ],
+    "look": [
+     -20,
+     6,
+     -22.2
+    ],
+    "fov": 46
+   },
+   "to": {
+    "pos": [
+     -70,
+     30,
+     97.8
+    ],
+    "look": [
+     0,
+     0,
+     -32.2
+    ],
+    "fov": 42
+   }
+  },
+  {
+   "type": "move",
+   "start": 5,
+   "end": 9,
+   "ease": "inOut",
+   "in": "flash",
+   "from": {
+    "pos": [
+     32.2,
+     131.2,
+     174
+    ],
+    "look": [
+     0,
+     0,
+     -22.2
+    ],
+    "fov": 44
+   },
+   "to": {
+    "pos": [
+     -16.1,
+     105.8,
+     135.8
+    ],
+    "look": [
+     0,
+     0,
+     -26.2
+    ],
+    "fov": 44
+   }
+  },
+  {
+   "type": "move",
+   "start": 9,
+   "end": 14.8,
+   "ease": "linear",
+   "in": "flash",
+   "from": {
+    "pos": [
+     -168.4,
+     14,
+     27
+    ],
+    "look": [
+     -145.4,
+     1,
+     0
+    ],
+    "fov": 42
+   },
+   "to": {
+    "pos": [
+     51.1,
+     10,
+     22
+    ],
+    "look": [
+     69.1,
+     1,
+     0
+    ],
+    "fov": 40
+   }
+  },
+  {
+   "type": "move",
+   "start": 15.9,
+   "end": 18,
+   "ease": "linear",
+   "in": "cut",
+   "from": {
+    "pos": [
+     47,
+     14,
+     29
+    ],
+    "look": [
+     20,
+     1,
+     6
+    ],
+    "fov": 42
+   },
+   "to": {
+    "pos": [
+     42,
+     10,
+     -35.1
+    ],
+    "look": [
+     20,
+     1,
+     -53.1
+    ],
+    "fov": 40
+   }
+  },
+  {
+   "type": "orbit",
+   "start": 18,
+   "end": 24,
+   "in": "flash",
+   "center": [
+    -10,
+    0,
+    17.5
+   ],
+   "r0": 48,
+   "r1": 37.6,
+   "h0": 26,
+   "h1": 17,
+   "a0": 62,
+   "a1": 112,
+   "fov0": 40,
+   "fov1": 38,
+   "lookY": 1,
+   "ease": "inOut"
+  },
+  {
+   "type": "orbit",
+   "start": 24,
+   "end": 29.7,
+   "in": "flash",
+   "center": [
+    -52,
+    0,
+    -15.7
+   ],
+   "r0": 46.9,
+   "r1": 38,
+   "h0": 7.6,
+   "h1": 16.2,
+   "a0": 48,
+   "a1": 112,
+   "fov0": 42,
+   "fov1": 38,
+   "lookY": 3.8,
+   "ease": "inOut"
+  },
+  {
+   "type": "orbit",
+   "start": 29.7,
+   "end": 35.3,
+   "in": "whip",
+   "center": [
+    -27,
+    0,
+    -15.7
+   ],
+   "r0": 46.9,
+   "r1": 38,
+   "h0": 7.6,
+   "h1": 16.2,
+   "a0": 132,
+   "a1": 68,
+   "fov0": 42,
+   "fov1": 38,
+   "lookY": 3.8,
+   "ease": "inOut"
+  },
+  {
+   "type": "orbit",
+   "start": 35.3,
+   "end": 41,
+   "in": "whip",
+   "center": [
+    34.3,
+    0,
+    -36
+   ],
+   "r0": 46.9,
+   "r1": 38,
+   "h0": 7.6,
+   "h1": 16.2,
+   "a0": 138,
+   "a1": 202,
+   "fov0": 42,
+   "fov1": 38,
+   "lookY": 3.8,
+   "ease": "inOut"
+  },
+  {
+   "type": "move",
+   "start": 41,
+   "end": 46,
+   "ease": "inOut",
+   "in": "whip",
+   "from": {
+    "pos": [
+     -76,
+     45,
+     112.5
+    ],
+    "look": [
+     -28.5,
+     2,
+     -22.2
+    ],
+    "fov": 44
+   },
+   "to": {
+    "pos": [
+     47.5,
+     36.9,
+     97.5
+    ],
+    "look": [
+     14.3,
+     2,
+     -27.2
+    ],
+    "fov": 44
+   }
+  },
+  {
+   "type": "move",
+   "start": 46,
+   "end": 52,
+   "ease": "inOut",
+   "in": "flash",
+   "from": {
+    "pos": [
+     93.1,
+     15,
+     9
+    ],
+    "look": [
+     -95,
+     3,
+     -2
+    ],
+    "fov": 44
+   },
+   "to": {
+    "pos": [
+     47.5,
+     10,
+     3
+    ],
+    "look": [
+     -95,
+     5,
+     -1
+    ],
+    "fov": 40
+   }
+  },
+  {
+   "type": "orbit",
+   "center": [
+    0,
+    0,
+    -22.2
+   ],
+   "look": [
+    -104.5,
+    0,
+    -22.2
+   ],
+   "r0": 124.4,
+   "r1": 199,
+   "h0": 49.8,
+   "h1": 89.6,
+   "a0": -14,
+   "a1": 8,
+   "fov0": 46,
+   "fov1": 46,
+   "ease": "out",
+   "start": 52,
+   "end": 60,
+   "in": "flash"
+  }
+ ],
+ "captions": [
+  {
+   "start": 5,
+   "end": 9,
+   "key": "survey",
+   "text": "GRUNDSTÜCK WIRD VORBEREITET"
+  },
+  {
+   "start": 9,
+   "end": 18,
+   "key": "road",
+   "text": "STRASSEN WERDEN GEBAUT"
+  },
+  {
+   "start": 18,
+   "end": 24,
+   "key": "area",
+   "text": "KLEINER PLATZ ENTSTEHT"
+  },
+  {
+   "start": 24,
+   "end": 41,
+   "key": "building",
+   "text": "HÄUSER WERDEN HOCHGEZOGEN",
+   "sub": [
+    {
+     "at": 0,
+     "text": "FUNDAMENTE ENTSTEHEN"
+    },
+    {
+     "at": 0.2,
+     "text": "WÄNDE WERDEN HOCHGEZOGEN"
+    },
+    {
+     "at": 0.6,
+     "text": "DÄCHER WERDEN FERTIGGESTELLT"
+    },
+    {
+     "at": 0.8,
+     "text": "FENSTER, TÜREN & GARTEN"
+    }
+   ],
+   "heroes": [
+    {
+     "from": 24,
+     "to": 29.7,
+     "start": 22.5,
+     "end": 30
+    },
+    {
+     "from": 29.7,
+     "to": 35.3,
+     "start": 28.2,
+     "end": 35.6
+    },
+    {
+     "from": 35.3,
+     "to": 41,
+     "start": 33.9,
+     "end": 41.3
+    }
+   ]
+  },
+  {
+   "start": 41,
+   "end": 46,
+   "key": "tree",
+   "text": "BÄUME WERDEN GEPFLANZT"
+  },
+  {
+   "start": 46,
+   "end": 52,
+   "key": "lamp",
+   "text": "STRASSENBELEUCHTUNG WIRD INSTALLIERT"
+  }
+ ],
+ "toasts": [
+  {
+   "at": 24.2,
+   "text": "DORFPLATZ",
+   "cost": 0
+  },
+  {
+   "at": 29.6,
+   "text": "WOHNHAUS",
+   "cost": 0
+  },
+  {
+   "at": 35.2,
+   "text": "WOHNHAUS",
+   "cost": 0
+  },
+  {
+   "at": 40.9,
+   "text": "WOHNHAUS",
+   "cost": 0
+  }
+ ],
+ "intro": {
+  "start": 0.3,
+  "end": 4.7,
+  "kicker": "EPISODE 001",
+  "title": "AUSLÄNDERSTADT",
+  "line": [
+   "0 FOLLOWER.",
+   "EIN LEERES GRUNDSTÜCK."
+  ],
+  "rule": "1 FOLLOWER = 1.000 € BAU-BUDGET"
+ },
+ "endCard": {
+  "start": 53.6,
+  "title": "WIE GROSS WIRD AUSLÄNDERSTADT?",
+  "sub": "FOLGE, UM DEINE STADT WACHSEN ZU LASSEN."
+ },
+ "voiceover": null,
+ "finalCamera": {
+  "type": "orbit",
+  "center": [
+   0,
+   0,
+   -22.2
+  ],
+  "look": [
+   -104.5,
+   0,
+   -22.2
+  ],
+  "r0": 124.4,
+  "r1": 199,
+  "h0": 49.8,
+  "h1": 89.6,
+  "a0": -14,
+  "a1": 8,
+  "fov0": 46,
+  "fov1": 46,
+  "ease": "out"
+ }
+}
