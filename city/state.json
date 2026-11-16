@@ -14,7 +14,7 @@
   "timeOfDay": 0.15
  },
  "followers": 0,
- "episodesRendered": 0,
+ "episodesRendered": 1,
  "roads": [
   {
    "id": "road_main",
@@ -495,6 +495,82 @@
    "episode": 1
   }
  ],
- "cameras": {},
- "episodes": []
+ "cameras": {
+  "final_aerial": {
+   "type": "orbit",
+   "center": [
+    0,
+    0,
+    -22.2
+   ],
+   "look": [
+    -104.5,
+    0,
+    -22.2
+   ],
+   "r0": 124.4,
+   "r1": 199,
+   "h0": 49.8,
+   "h1": 89.6,
+   "a0": -14,
+   "a1": 8,
+   "fov0": 46,
+   "fov1": 46,
+   "ease": "out"
+  }
+ },
+ "episodes": [
+  {
+   "number": 1,
+   "title": "Die erste Stadt",
+   "followers": 0,
+   "built": [
+    "road_main",
+    "road_side",
+    "plaza_1",
+    "house_1",
+    "house_2",
+    "house_3",
+    "tree_1",
+    "tree_2",
+    "tree_3",
+    "tree_4",
+    "tree_5",
+    "tree_6",
+    "tree_7",
+    "tree_8",
+    "tree_9",
+    "tree_10",
+    "tree_11",
+    "tree_12",
+    "tree_13",
+    "tree_14",
+    "tree_15",
+    "tree_16",
+    "tree_17",
+    "tree_18",
+    "tree_19",
+    "tree_20",
+    "tree_21",
+    "tree_22",
+    "tree_23",
+    "tree_24",
+    "lamp_1",
+    "lamp_2",
+    "lamp_3",
+    "lamp_4",
+    "lamp_5",
+    "lamp_6",
+    "lamp_7",
+    "lamp_8",
+    "lamp_9",
+    "lamp_10",
+    "lamp_11",
+    "lamp_12"
+   ],
+   "video": "output/episode_001.mp4",
+   "cover": "output/episode_001_cover.jpg",
+   "renderedAt": "2026-11-16T20:39:10.024Z"
+  }
+ ]
 }
