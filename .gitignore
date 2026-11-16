@@ -1,0 +1,5 @@
+node_modules/
+output/*_draft*
+output/*_ausschnitt*
+*.tmp
+.DS_Store

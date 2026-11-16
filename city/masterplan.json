@@ -1,0 +1,485 @@
+{
+ "note": "Geplante Stadtentwicklung. Reihenfolge = Baureihenfolge. Positionen sind fest, damit die Stadt in jeder Episode dieselbe bleibt.",
+ "milestones": [
+  {
+   "followers": 1000,
+   "title": "Erste Wohnstraße",
+   "text": "Weitere Wohnhäuser, erste Wohnstraße"
+  },
+  {
+   "followers": 2000,
+   "title": "Nahversorgung",
+   "text": "Supermarkt, Parkplatz, kleine Geschäfte"
+  },
+  {
+   "followers": 3000,
+   "title": "Bildung & Sport",
+   "text": "Schule, Fußballplatz"
+  },
+  {
+   "followers": 5000,
+   "title": "Stadtzentrum",
+   "text": "Großes Rathaus, monumentale Statue, zentraler Marktplatz"
+  },
+  {
+   "followers": 10000,
+   "title": "Großstadt",
+   "text": "Größere Wohngebiete, Moschee, Einkaufszentrum, neue Straßen"
+  },
+  {
+   "followers": 25000,
+   "title": "Skyline",
+   "text": "Hochhäuser, Gewerbegebiet, großer Stadtpark"
+  }
+ ],
+ "entries": [
+  {
+   "milestone": 1000,
+   "id": "road_garten",
+   "type": "road",
+   "name": "Gartenweg",
+   "kind": "residential",
+   "a": [
+    23,
+    -72
+   ],
+   "b": [
+    -90,
+    -72
+   ],
+   "width": 6,
+   "sidewalk": 2
+  },
+  {
+   "milestone": 1000,
+   "id": "house_4",
+   "type": "house",
+   "x": -22,
+   "z": -57.75,
+   "rot": 180,
+   "w": 10,
+   "d": 8.5,
+   "floors": 2,
+   "wall": "#f1dcc0",
+   "roof": "#8d3f2b",
+   "shutters": "#7a3b2e",
+   "garage": true,
+   "car": "#c9ccd1"
+  },
+  {
+   "milestone": 1000,
+   "id": "house_5",
+   "type": "house",
+   "x": 2,
+   "z": -57.75,
+   "rot": 180,
+   "w": 10,
+   "d": 8.5,
+   "floors": 2,
+   "wall": "#f6f1e7",
+   "roof": "#5c4a44",
+   "balcony": true,
+   "flowers": "#d6336c"
+  },
+  {
+   "milestone": 1000,
+   "id": "house_6",
+   "type": "house",
+   "x": -22,
+   "z": -86.25,
+   "rot": 0,
+   "w": 10,
+   "d": 8.5,
+   "floors": 2,
+   "wall": "#e8d1a6",
+   "roof": "#a8472f",
+   "pergola": true,
+   "flowers": "#e03131"
+  },
+  {
+   "milestone": 1000,
+   "id": "house_7",
+   "type": "house",
+   "x": 2,
+   "z": -86.25,
+   "rot": 0,
+   "w": 10,
+   "d": 8.5,
+   "floors": 2,
+   "wall": "#f4ead7",
+   "roof": "#b6532f",
+   "shutters": "#3f6f4f",
+   "garage": true,
+   "car": "#8a1f1f"
+  },
+  {
+   "milestone": 1000,
+   "id": "house_8",
+   "type": "house",
+   "x": -46,
+   "z": -86.25,
+   "rot": 0,
+   "w": 10,
+   "d": 8.5,
+   "floors": 2,
+   "wall": "#dfe7ea",
+   "roof": "#5c4a44",
+   "shutters": "#2f4f7f",
+   "tree": "linden"
+  },
+  {
+   "milestone": 2000,
+   "id": "parking_1",
+   "type": "parking",
+   "name": "Parkplatz",
+   "x": 51,
+   "z": 16.5,
+   "rot": 0
+  },
+  {
+   "milestone": 2000,
+   "id": "supermarket_1",
+   "type": "supermarket",
+   "name": "AUSLÄNDER MARKT",
+   "x": 51,
+   "z": 42.5,
+   "rot": 180
+  },
+  {
+   "milestone": 2000,
+   "id": "shop_1",
+   "type": "shop",
+   "name": "DÖNER KEBAP",
+   "x": -8,
+   "z": -15.6,
+   "rot": 0,
+   "wall": "#f0dfc0"
+  },
+  {
+   "milestone": 2000,
+   "id": "shop_2",
+   "type": "shop",
+   "name": "BÄCKEREI SIMIT",
+   "x": 4,
+   "z": -15.6,
+   "rot": 0,
+   "wall": "#e9d3ad",
+   "roof": "#6a4a40"
+  },
+  {
+   "milestone": 3000,
+   "id": "road_main_e",
+   "type": "road",
+   "name": "Hauptstraße Ost",
+   "kind": "main",
+   "a": [
+    95,
+    0
+   ],
+   "b": [
+    155,
+    0
+   ],
+   "width": 8,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 3000,
+   "id": "school_1",
+   "type": "school",
+   "name": "GRUNDSCHULE",
+   "x": 80,
+   "z": -30.5,
+   "rot": 0
+  },
+  {
+   "milestone": 3000,
+   "id": "pitch_1",
+   "type": "pitch",
+   "name": "Fußballplatz",
+   "x": 86,
+   "z": -72,
+   "rot": 0
+  },
+  {
+   "milestone": 5000,
+   "id": "market_1",
+   "type": "market",
+   "name": "Marktplatz",
+   "x": -10,
+   "z": 50.5,
+   "rot": 0
+  },
+  {
+   "milestone": 5000,
+   "id": "statue_1",
+   "type": "statue",
+   "name": "Denkmal",
+   "x": -10,
+   "z": 82,
+   "rot": 180
+  },
+  {
+   "milestone": 5000,
+   "id": "townhall_1",
+   "type": "townhall",
+   "name": "RATHAUS",
+   "x": -10,
+   "z": 112,
+   "rot": 180
+  },
+  {
+   "milestone": 10000,
+   "id": "road_main_w",
+   "type": "road",
+   "name": "Hauptstraße West",
+   "kind": "main",
+   "a": [
+    -95,
+    0
+   ],
+   "b": [
+    -150,
+    0
+   ],
+   "width": 8,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 10000,
+   "id": "road_west",
+   "type": "road",
+   "name": "Weststraße",
+   "kind": "side",
+   "a": [
+    -120,
+    0
+   ],
+   "b": [
+    -120,
+    95
+   ],
+   "width": 7,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 10000,
+   "id": "mosque_1",
+   "type": "mosque",
+   "name": "Moschee",
+   "x": -70,
+   "z": 43.5,
+   "rot": 180
+  },
+  {
+   "milestone": 10000,
+   "id": "apartment_1",
+   "type": "apartment",
+   "x": -139,
+   "z": 22,
+   "rot": 90,
+   "floors": 5,
+   "wall": "#f0e4cf",
+   "accent": "#c96f4a"
+  },
+  {
+   "milestone": 10000,
+   "id": "apartment_2",
+   "type": "apartment",
+   "x": -139,
+   "z": 54,
+   "rot": 90,
+   "floors": 6,
+   "wall": "#e6ecef",
+   "accent": "#3f6f8f"
+  },
+  {
+   "milestone": 10000,
+   "id": "apartment_3",
+   "type": "apartment",
+   "x": -139,
+   "z": 86,
+   "rot": 90,
+   "floors": 5,
+   "wall": "#f3e2b8",
+   "accent": "#7a9a4a"
+  },
+  {
+   "milestone": 10000,
+   "id": "apartment_4",
+   "type": "apartment",
+   "x": -126,
+   "z": -19.5,
+   "rot": 0,
+   "floors": 4,
+   "wall": "#f0e4cf",
+   "accent": "#b3564a"
+  },
+  {
+   "milestone": 10000,
+   "id": "apartment_5",
+   "type": "apartment",
+   "x": -94,
+   "z": -19.5,
+   "rot": 0,
+   "floors": 5,
+   "wall": "#ece6da",
+   "accent": "#c98a3a"
+  },
+  {
+   "milestone": 10000,
+   "id": "mall_1",
+   "type": "mall",
+   "name": "CITY CENTER",
+   "x": 115,
+   "z": 35.5,
+   "rot": 180
+  },
+  {
+   "milestone": 25000,
+   "id": "road_west_2",
+   "type": "road",
+   "name": "Weststraße Süd",
+   "kind": "side",
+   "a": [
+    -120,
+    95
+   ],
+   "b": [
+    -120,
+    140
+   ],
+   "width": 7,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 25000,
+   "id": "road_south",
+   "type": "road",
+   "name": "Südring",
+   "kind": "main",
+   "a": [
+    -123.5,
+    140
+   ],
+   "b": [
+    173.5,
+    140
+   ],
+   "width": 8,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 25000,
+   "id": "road_main_e2",
+   "type": "road",
+   "name": "Hauptstraße Ost II",
+   "kind": "main",
+   "a": [
+    155,
+    0
+   ],
+   "b": [
+    170,
+    0
+   ],
+   "width": 8,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 25000,
+   "id": "road_east",
+   "type": "road",
+   "name": "Oststraße",
+   "kind": "side",
+   "a": [
+    170,
+    140
+   ],
+   "b": [
+    170,
+    -100
+   ],
+   "width": 7,
+   "sidewalk": 2.5
+  },
+  {
+   "milestone": 25000,
+   "id": "park_1",
+   "type": "park",
+   "name": "Stadtpark",
+   "x": -74,
+   "z": 104,
+   "rot": 0
+  },
+  {
+   "milestone": 25000,
+   "id": "highrise_1",
+   "type": "highrise",
+   "x": 60,
+   "z": 116.5,
+   "rot": 0,
+   "floors": 18,
+   "wall": "#cfe0ee"
+  },
+  {
+   "milestone": 25000,
+   "id": "highrise_2",
+   "type": "highrise",
+   "x": 98,
+   "z": 116.5,
+   "rot": 0,
+   "floors": 26,
+   "wall": "#bcd3e6"
+  },
+  {
+   "milestone": 25000,
+   "id": "highrise_3",
+   "type": "highrise",
+   "x": 136,
+   "z": 116.5,
+   "rot": 0,
+   "floors": 21,
+   "wall": "#d9e3ea"
+  },
+  {
+   "milestone": 25000,
+   "id": "highrise_4",
+   "type": "highrise",
+   "x": 60,
+   "z": 163.5,
+   "rot": 180,
+   "floors": 30,
+   "wall": "#c4d6e2"
+  },
+  {
+   "milestone": 25000,
+   "id": "warehouse_1",
+   "type": "warehouse",
+   "name": "LOGISTIK GMBH",
+   "x": 203,
+   "z": -70,
+   "rot": -90
+  },
+  {
+   "milestone": 25000,
+   "id": "warehouse_2",
+   "type": "warehouse",
+   "name": "BALKAN IMPORT",
+   "x": 203,
+   "z": -20,
+   "rot": -90,
+   "accent": "#1f5c3a"
+  },
+  {
+   "milestone": 25000,
+   "id": "warehouse_3",
+   "type": "warehouse",
+   "name": "ANADOLU FOODS",
+   "x": 203,
+   "z": 40,
+   "rot": -90,
+   "accent": "#b3261e"
+  }
+ ]
+}

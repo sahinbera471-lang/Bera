@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUSLÄNDERSTADT – Stadt-Dashboard</title>
+<link rel="stylesheet" href="/fonts.css">
+<link rel="stylesheet" href="/style.css">
+<script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">AUSLÄNDERSTADT</span><span class="tag">AI Follower City · Stadt-Dashboard</span></div>
+  <div class="stats">
+    <div><b id="st-ep">–</b><span>nächste Episode</span></div>
+    <div><b id="st-followers">–</b><span>Follower</span></div>
+    <div><b id="st-budget">–</b><span>Bau-Budget (virtuell)</span></div>
+    <div><b id="st-avail">–</b><span>verfügbar</span></div>
+    <div><b id="st-buildings">–</b><span>Gebäude</span></div>
+  </div>
+</header>
+<main>
+  <section class="stage">
+    <div class="viewport"><canvas id="view"></canvas><div id="hint" class="hint"></div><div id="loading" class="loading">Stadt wird geladen …</div></div>
+    <div class="transport">
+      <div class="seg">
+        <button id="mode-free" class="on" title="Aktueller Stand, frei drehbar">Freie Ansicht</button>
+        <button id="mode-ep" title="Bauanimation der nächsten Episode">Episoden-Vorschau</button>
+      </div>
+      <div id="free-ctl" class="row">
+        <label>Tageszeit <input id="tod" type="range" min="0" max="1" step="0.01" value="0.15"></label>
+        <button id="cam-aerial" class="ghost">Luftaufnahme</button>
+      </div>
+      <div id="ep-ctl" class="row hidden">
+        <button id="play">▶ Abspielen</button>
+        <input id="scrub" type="range" min="0" max="60" step="0.033" value="0">
+        <span id="time" class="mono">0,0 s</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panels">
+    <div class="card">
+      <h2>1 · Follower &amp; Bau-Budget</h2>
+      <p class="muted">1 neuer Follower = 1.000 € virtuelles Bau-Budget (reine Spielmechanik, kein echtes Geld).</p>
+      <form id="f-followers" class="row">
+        <input id="followers" type="number" min="0" step="1" inputmode="numeric" placeholder="Aktueller Followerstand">
+        <button type="submit">Übernehmen</button>
+      </form>
+      <div class="kv"><span>Budget gesamt</span><b id="b-total">–</b><span>bereits verbaut / verplant</span><b id="b-spent">–</b><span>verfügbar</span><b id="b-avail" class="ok">–</b></div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Das kann jetzt gebaut werden</h2>
+      <p class="muted">Automatisch berechnet aus dem verfügbaren Budget, in der Reihenfolge des Masterplans.</p>
+      <ul id="plan" class="list"></ul>
+      <div id="plan-next" class="note"></div>
+      <button id="plan-commit" class="primary">Alles einplanen</button>
+    </div>
+
+    <div class="card">
+      <h2>3 · Stadtteile &amp; Meilensteine</h2>
+      <ul id="milestones" class="list ms"></ul>
+    </div>
+
+    <div class="card">
+      <h2>4 · Eigenes Gebäude hinzufügen</h2>
+      <div class="grid2">
+        <label>Typ<select id="c-type"></select></label>
+        <label>Ausrichtung<select id="c-rot"><option value="0">Front nach Süden</option><option value="180">Front nach Norden</option><option value="90">Front nach Osten</option><option value="270">Front nach Westen</option></select></label>
+        <label class="span2">Name / Schild (optional)<input id="c-name" maxlength="24" placeholder="z. B. BALKAN GRILL"></label>
+      </div>
+      <button id="c-place">Auf dem Grundstück platzieren</button>
+      <p class="muted" id="c-info"></p>
+    </div>
+
+    <div class="card">
+      <h2>5 · Geplant für <span id="p-ep">die nächste Episode</span></h2>
+      <ul id="pending" class="list"></ul>
+      <div class="row">
+        <button id="restore" class="ghost" title="Verwirft alle noch nicht gerenderten Bauten">Letzten Baufortschritt laden</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>6 · TikTok-Episode rendern</h2>
+      <p class="muted">9:16 · 1080 × 1920 · 30 FPS · 60 Sekunden · Musik, Soundeffekte, Untertitel.</p>
+      <div class="row">
+        <button id="r-draft">Schneller Entwurf</button>
+        <button id="r-final" class="primary">Episode rendern (MP4)</button>
+      </div>
+      <div id="r-status" class="note"></div>
+      <div class="bar"><i id="r-bar"></i></div>
+      <h3>Fertige Videos</h3>
+      <ul id="outputs" class="list"></ul>
+      <video id="player" controls playsinline class="hidden"></video>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+<script type="module" src="/dashboard.js"></script>
+</body>
+</html>

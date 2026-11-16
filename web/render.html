@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/fonts.css">
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module">
+import { Player, loadFonts } from '/engine/player.js';
+const q = new URLSearchParams(location.search);
+const W = +(q.get('w') || 1080), H = +(q.get('h') || 1920);
+window.ready = (async () => {
+  await loadFonts();
+  const state = await (await fetch('/api/state')).json();
+  const epN = q.get('episode');
+  const episode = epN ? await (await fetch('/api/episode/' + epN)).json() : null;
+  const player = new Player({ canvas: document.getElementById('c'), width: W, height: H, state });
+  player.setCity(state, episode);
+  window.player = player;
+  window.episode = episode;
+  // liefert ein JPEG (base64) des Frames zum Zeitpunkt t
+  window.frame = (t, quality = 0.93) => {
+    player.renderAt(t);
+    return player.out.toDataURL('image/jpeg', quality).slice(23);
+  };
+  // freie Kamera für Standbilder: pos/look in Metern
+  window.still = (pos, look, fov = 42, tod = 0.15, quality = 0.93) => {
+    player.camera.position.set(...pos);
+    player.look.set(...look);
+    player.camera.fov = fov;
+    player.camera.lookAt(player.look);
+    player.camera.updateProjectionMatrix();
+    player.renderFree(tod);
+    return player.out.toDataURL('image/jpeg', quality).slice(23);
+  };
+  return true;
+})();
+</script>
+</body>
+</html>
