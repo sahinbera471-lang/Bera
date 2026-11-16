@@ -1,0 +1,5 @@
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:block;src:url('/vendor/fonts/anton/files/anton-latin-400-normal.woff2') format('woff2'),url('/vendor/fonts/anton/files/anton-latin-ext-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:block;src:url('/vendor/fonts/inter/files/inter-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:block;src:url('/vendor/fonts/inter/files/inter-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:block;src:url('/vendor/fonts/inter/files/inter-latin-700-normal.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:800;font-display:block;src:url('/vendor/fonts/inter/files/inter-latin-800-normal.woff2') format('woff2')}

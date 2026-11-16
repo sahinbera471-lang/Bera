@@ -1,0 +1,35 @@
+{
+  "name": "auslaenderstadt",
+  "version": "1.0.0",
+  "description": "AUSLÄNDERSTADT – AI Follower City: fortlaufend wachsende 3D-Stadt für eine TikTok-Serie",
+  "scripts": {
+    "start": "node server/server.js",
+    "render": "node server/render.js",
+    "still": "node tools/still.mjs",
+    "voiceover": "node tools/voiceover.mjs",
+    "bench": "node tools/bench.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sahinbera471-lang/Bera.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sahinbera471-lang/Bera/issues"
+  },
+  "homepage": "https://github.com/sahinbera471-lang/Bera#readme",
+  "dependencies": {
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "three": "^0.170.0"
+  },
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "playwright": ">=1.40"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": true
+    }
+  }
+}
